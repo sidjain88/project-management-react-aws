@@ -1,31 +1,17 @@
 import React from 'react';
 import MaterialTable from 'material-table';
+import SampleData from '../data/sample-projects.json';
 
 export default function MaterialTableDemo(props) {
 	const [ state, setState ] = React.useState({
 		columns: [
+			{ title: 'Id', field: 'id', hidden: true },
 			{ title: 'Name', field: 'name' },
-			{ title: 'Surname', field: 'surname' },
-			{ title: 'Birth Year', field: 'birthYear', type: 'numeric' },
-			{
-				title: 'Birth Place',
-				field: 'birthCity',
-				lookup: { 34: 'İstanbul', 63: 'Şanlıurfa' }
-			}
+			{ title: 'Manager', field: 'manager' },
+			{ title: 'Date Started', field: 'startDate', type: 'numeric' },
+			{ title: 'Type', field: 'type', type: 'date' }
 		],
-		data: [
-			{ name: 'Mehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 },
-			{
-				name: 'Zerya Betül',
-				surname: 'Baran',
-				birthYear: 2017,
-				birthCity: 34
-			},
-			{ name: 'aehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 },
-			{ name: 'behmet', surname: 'Baran', birthYear: 1987, birthCity: 63 },
-			{ name: 'cehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 },
-			{ name: 'dehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 }
-		]
+		data: SampleData
 	});
 
 	return (
@@ -33,14 +19,12 @@ export default function MaterialTableDemo(props) {
 			title="Active Projects"
 			columns={state.columns}
 			data={state.data}
-			onRowClick={() => {
-                console.log(props);
-                //alert(props);
-				//window.location = '/poject';
+			onRowClick={(event, rowData) => {
+				window.location = '/project/' + rowData.id;
 			}}
-			options={{
-				//actionsColumnIndex: 4
-			}}
+			//options={{
+			//	actionsColumnIndex: 4
+			//}}
 			// actions={[
 			// 	{
 			// 		icon: 'view_column',
@@ -50,7 +34,7 @@ export default function MaterialTableDemo(props) {
 			// 		}
 			// 	}
 			// ]}
-			detailPanel={() => <div>project details</div>}
+			detailPanel={() => <div>Extra project details (not detailed view)</div>}
 			//editable={{
 			//   onRowAdd: newData =>
 			//     new Promise(resolve => {

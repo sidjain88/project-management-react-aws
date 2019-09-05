@@ -1,0 +1,9 @@
+[
+	{ "id": 1, "name": "Internal Project 1", "manager": "Baran Adams", "startDate": "29/1/2016", "type": "internal" },
+	{ "id": 2, "name": "Internal Project 2", "manager": "Tony James", "startDate": "15/6/2015", "type": "internal" },
+	{ "id": 3, "name": "PoC Project 1", "manager": "Tony James", "startDate": "5/1/2019", "type": "research" },
+	{ "id": 4, "name": "PoC Project 2", "manager": "Peter Alex", "startDate": "2/8/2019", "type": "research" },
+	{ "id": 5, "name": "Research Project 1", "manager": "Baran Adams", "startDate": "8/4/2019", "type": "research" },
+	{ "id": 6, "name": "Client Project 1", "manager": "Peter James", "startDate": "8/4/2019", "type": "research" },
+	{ "id": 7, "name": "Client Project 2", "manager": "Peter Alex", "startDate": "8/4/2019", "type": "research" }
+]
