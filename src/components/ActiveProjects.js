@@ -20,7 +20,7 @@ export default function MaterialTableDemo(props) {
 			columns={state.columns}
 			data={state.data}
 			onRowClick={(event, rowData) => {
-				window.location = '/project/' + rowData.id;
+				window.location = '/projects/' + rowData.id;
 			}}
 			//options={{
 			//	actionsColumnIndex: 4

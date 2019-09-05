@@ -1,22 +1,22 @@
 import React from 'react';
 import '../App.css';
-import { NavLink as RouterLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 export const TopNavigation = () => (
 	<nav>
 		<div className="Top-nav">
-			<RouterLink activeClassName="active" to="/home">
+			<NavLink activeClassName="active" to="/home">
 				Home
-			</RouterLink>
-			<RouterLink activeClassName="active" to="/utilization">
+			</NavLink>
+			<NavLink activeClassName="active" to="/utilization">
 				View Utilization
-			</RouterLink>
-			<RouterLink activeClassName="active" to="/projects/add">
+			</NavLink>
+			<NavLink activeClassName="active" to="/projects/0">
 				Add Project
-			</RouterLink>
-			<RouterLink activeClassName="active" to="/resources/add">
+			</NavLink>
+			<NavLink activeClassName="active" to="/resources/0">
 				Add Resource
-			</RouterLink>
+			</NavLink>
 		</div>
 	</nav>
 );
