@@ -15,17 +15,17 @@ export default function MaterialTableDemo(props) {
 				field: 'start_date',
 				type: 'date',
 				defaultSort: 'desc',
-				customSort: (a, b) => a.startDate - b.startDate
+				customSort: (a, b) => a.start_date - b.start_date
 			},
 			{
 				title: 'End Date',
 				field: 'end_date',
 				type: 'date',
-				customSort: (a, b) => a.startDate - b.startDate
+				customSort: (a, b) => a.start_date - b.start_date
 			}
 		],
 		data: SampleData.map((entry) =>
-			Object.assign(entry, { startDate: new Date(entry.startDate), endDate: new Date(entry.endDate) })
+			Object.assign(entry, { start_date: new Date(entry.start_date), end_date: new Date(entry.end_date) })
 		)
 	});
 
