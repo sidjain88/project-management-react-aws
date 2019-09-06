@@ -1,10 +1,10 @@
 [
-	{ "id": 1, "name": "Internal Project 1", "manager": "Baran Adams", "startDate": "2016-01-29", "endDate": "2021-01-28", "type": "internal" },
-	{ "id": 2, "name": "Internal Project 2", "manager": "Tony James", "startDate": "2015-06-15", "endDate": "2021-06-14", "type": "internal" },
-	{ "id": 3, "name": "PoC Project 1", "manager": "Tony James", "startDate": "2019-01-05", "endDate": "2024-01-04", "type": "research" },
-	{ "id": 4, "name": "PoC Project 2", "manager": "Peter Alex", "startDate": "2019-08-02", "endDate": "2024-08-02", "type": "research" },
-	{ "id": 5, "name": "Research Project 1", "manager": "Baran Adams", "startDate": "2019-04-08", "endDate": "2024-04-08", "type": "research" },
-	{ "id": 6, "name": "Client Project 1", "manager": "Peter James", "startDate": "2018-11-15", "endDate": "2024-11-14", "type": "research" },
-	{ "id": 7, "name": "Client Project 2", "manager": "Peter Alex", "startDate": "2018-04-08", "endDate": "2023-04-07", "type": "research" },
-	{ "id": 8, "name": "Dev Challenge", "manager": "James Phill", "startDate": "2018-04-08", "endDate": "2020-01-29", "type": "devs" }
+	{ "project_id": 1, "name": "Internal Project 1", "manager": "Baran Adams", "start_date": "2016-01-29", "end_date": "2021-01-28", "project_type": "internal" },
+	{ "project_id": 2, "name": "Internal Project 2", "manager": "Tony James", "start_date": "2015-06-15", "end_date": "2021-06-14", "project_type": "internal" },
+	{ "project_id": 3, "name": "PoC Project 1", "manager": "Tony James", "start_date": "2019-01-05", "end_date": "2024-01-04", "project_type": "research" },
+	{ "project_id": 4, "name": "PoC Project 2", "manager": "Peter Alex", "start_date": "2019-08-02", "end_date": "2024-08-02", "project_type": "research" },
+	{ "project_id": 5, "name": "Research Project 1", "manager": "Baran Adams", "start_date": "2019-04-08", "end_date": "2024-04-08", "project_type": "research" },
+	{ "project_id": 6, "name": "Client Project 1", "manager": "Peter James", "start_date": "2018-11-15", "end_date": "2024-11-14", "project_type": "research" },
+	{ "project_id": 7, "name": "Client Project 2", "manager": "Peter Alex", "start_date": "2018-04-08", "end_date": "2023-04-07", "project_type": "research" },
+	{ "project_id": 8, "name": "Dev Challenge", "manager": "James Phill", "start_date": "2018-04-08", "end_date": "2020-01-29", "project_type": "devs" }
 ]

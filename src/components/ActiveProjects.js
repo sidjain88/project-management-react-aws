@@ -6,20 +6,20 @@ import Project from './Project.js';
 export default function MaterialTableDemo(props) {
 	const [ state, setState ] = React.useState({
 		columns: [
-			{ title: 'Id', field: 'id', hidden: true },
+			{ title: 'Id', field: 'project_id', hidden: true },
 			{ title: 'Name', field: 'name' },
 			{ title: 'Manager', field: 'manager' },
-			{ title: 'Type', field: 'type' },
+			{ title: 'Type', field: 'project_type' },
 			{
 				title: 'Date Started',
-				field: 'startDate',
+				field: 'start_date',
 				type: 'date',
 				defaultSort: 'desc',
 				customSort: (a, b) => a.startDate - b.startDate
 			},
 			{
 				title: 'End Date',
-				field: 'endDate',
+				field: 'end_date',
 				type: 'date',
 				customSort: (a, b) => a.startDate - b.startDate
 			}
@@ -47,11 +47,11 @@ export default function MaterialTableDemo(props) {
 					isFreeAction: true,
 					tooltip: 'Add Project',
 					onClick: (event, rowData) => {
-						window.location = '/poject';
+						alert('Add Project Popup');
 					}
 				}
 			]}
-			detailPanel={() => <Project id="1" />}
+			//detailPanel={() => (<div>More project details</div>)}
 			editable={{
 				// onRowAdd: (newData) =>
 				// 	new Promise((resolve) => {

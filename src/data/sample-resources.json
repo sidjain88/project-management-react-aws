@@ -1,9 +1,9 @@
 [
-	{ "id": 1, "name": "Adam Jones", "manager": "Baran Adams", "startDate": "2016-01-29", "role": "Developer" },
-	{ "id": 2, "name": "Peter Smith", "manager": "Tony James", "startDate": "2015-06-15", "role": "Lead Developer" },
-	{ "id": 3, "name": "John Archer", "manager": "Tony James", "startDate": "2019-01-05", "role": "Tester" },
-	{ "id": 4, "name": "Simon Arthur", "manager": "Peter Alex", "startDate": "2019-08-02", "role": "Developer" },
-	{ "id": 5, "name": "Alex Bailey", "manager": "Baran Adams", "startDate": "2019-04-08", "role": "Developer" },
-	{ "id": 6, "name": "Jeffery Chen", "manager": "Peter James", "startDate": "2019-05-11", "role": "Tester" },
-	{ "id": 7, "name": "Bill Smith", "manager": "Peter Alex", "startDate": "2019-07-17", "role": "QA Lead" }
+	{ "resource_id": 1, "name": "Adam Jones", "manager": "Baran Adams", "start_date": "2016-01-29", "role": "Developer" },
+	{ "resource_id": 2, "name": "Peter Smith", "manager": "Tony James", "start_date": "2015-06-15", "role": "Lead Developer" },
+	{ "resource_id": 3, "name": "John Archer", "manager": "Tony James", "start_date": "2019-01-05", "role": "Tester" },
+	{ "resource_id": 4, "name": "Simon Arthur", "manager": "Peter Alex", "start_date": "2019-08-02", "role": "Developer" },
+	{ "resource_id": 5, "name": "Alex Bailey", "manager": "Baran Adams", "start_date": "2019-04-08", "role": "Developer" },
+	{ "resource_id": 6, "name": "Jeffery Chen", "manager": "Peter James", "start_date": "2019-05-11", "role": "Tester" },
+	{ "resource_id": 7, "name": "Bill Smith", "manager": "Peter Alex", "start_date": "2019-07-17", "role": "QA Lead" }
 ]

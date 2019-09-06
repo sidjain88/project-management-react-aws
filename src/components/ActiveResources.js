@@ -9,7 +9,7 @@ export default function MaterialTableDemo() {
 			{ title: 'Name', field: 'name', defaultSort: 'asc' },
 			{ title: 'Manager', field: 'manager' },
 			{ title: 'Role', field: 'role' },
-			{ title: 'Joined Date', field: 'startDate', type: 'date' }
+			{ title: 'Joined Date', field: 'start_date', type: 'date' }
 		],
 		data: SampleData.map((entry) => Object.assign(entry, { startDate: new Date(entry.startDate) }))
 	});
