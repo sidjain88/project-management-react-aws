@@ -6,12 +6,12 @@ export default function MaterialTableDemo() {
 	const [ state, setState ] = React.useState({
 		columns: [
 			{ title: 'Id', field: 'id', hidden: true },
-			{ title: 'Name', field: 'name' },
+			{ title: 'Name', field: 'name', defaultSort: 'asc' },
 			{ title: 'Manager', field: 'manager' },
 			{ title: 'Role', field: 'role' },
 			{ title: 'Joined Date', field: 'startDate', type: 'date' }
 		],
-		data: SampleData
+		data: SampleData.map((entry) => Object.assign(entry, { startDate: new Date(entry.startDate) }))
 	});
 
 	return (

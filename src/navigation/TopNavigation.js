@@ -9,14 +9,14 @@ export const TopNavigation = () => (
 				Home
 			</NavLink>
 			<NavLink activeClassName="active" to="/utilization">
-				View Utilization
+				Utilization
 			</NavLink>
-			<NavLink activeClassName="active" to="/projects/0">
+			{/* <NavLink activeClassName="active" to="/projects/0">
 				Add Project
 			</NavLink>
 			<NavLink activeClassName="active" to="/resources/0">
 				Add Resource
-			</NavLink>
+			</NavLink> */}
 		</div>
 	</nav>
 );
