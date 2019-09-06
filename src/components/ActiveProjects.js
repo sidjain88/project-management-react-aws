@@ -35,7 +35,7 @@ export default function MaterialTableDemo(props) {
 			columns={state.columns}
 			data={state.data}
 			onRowClick={(event, rowData) => {
-				window.location = '/projects/' + rowData.id;
+				window.location = '/projects/' + rowData.project_id;
 			}}
 			options={{
 				sorting: true,
