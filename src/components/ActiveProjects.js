@@ -1,7 +1,7 @@
 import React from 'react';
 import MaterialTable from 'material-table';
 import SampleData from '../data/sample-projects.json';
-import Project from './Project.js';
+import Icon from '@material-ui/core/Icon';
 
 export default function MaterialTableDemo(props) {
 	const [ state, setState ] = React.useState({
@@ -47,9 +47,16 @@ export default function MaterialTableDemo(props) {
 					isFreeAction: true,
 					tooltip: 'Add Project',
 					onClick: (event, rowData) => {
-						alert('Add Project Popup');
+						window.location = '/projects/0';
 					}
-				}
+				},
+				{
+					icon: 'edit',
+					tooltip: 'Edit Project',
+					onClick: (event, rowData) => {
+						window.location = '/projects/' + rowData.project_id;
+					}
+				},
 			]}
 			//detailPanel={() => (<div>More project details</div>)}
 			editable={{
@@ -62,15 +69,15 @@ export default function MaterialTableDemo(props) {
 				// 			setState({ ...state, data });
 				// 		}, 600);
 				// 	}),
-				onRowUpdate: (newData, oldData) =>
-					new Promise((resolve) => {
-						setTimeout(() => {
-							resolve();
-							const data = [ ...state.data ];
-							data[data.indexOf(oldData)] = newData;
-							setState({ ...state, data });
-						}, 600);
-					}),
+				// onRowUpdate: (newData, oldData) =>
+				// 	new Promise((resolve) => {
+				// 		setTimeout(() => {
+				// 			resolve();
+				// 			const data = [ ...state.data ];
+				// 			data[data.indexOf(oldData)] = newData;
+				// 			setState({ ...state, data });
+				// 		}, 600);
+				// 	}),
 				onRowDelete: (oldData) =>
 					new Promise((resolve) => {
 						setTimeout(() => {
@@ -80,6 +87,16 @@ export default function MaterialTableDemo(props) {
 							setState({ ...state, data });
 						}, 600);
 					})
+			}}
+			localization={{
+				body: {
+					editRow: {
+						deleteText: 'Are you sure you want to archive this project?'
+					}
+				}
+			}}
+			icons={{
+				Delete: React.forwardRef((props, ref) => <Icon {...props} ref={ref}>archive</Icon>)
 			}}
 		/>
 	);

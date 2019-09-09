@@ -7,8 +7,8 @@ export default function MaterialTableDemo() {
 		columns: [
 			{ title: 'Id', field: 'id', hidden: true },
 			{ title: 'Name', field: 'name', defaultSort: 'asc' },
-			{ title: 'Manager', field: 'manager' },
-			{ title: 'Role', field: 'role' },
+			// { title: 'Manager', field: 'manager' },
+			// { title: 'Role', field: 'role' },
 			{ title: 'Joined Date', field: 'start_date', type: 'date' }
 		],
 		data: SampleData.map((entry) => Object.assign(entry, { start_date: new Date(entry.start_date) }))
@@ -22,35 +22,6 @@ export default function MaterialTableDemo() {
 			onRowClick={(event, rowData) => {
 				window.location = '/resources/' + rowData.id;
 			}}
-			// editable={{
-			//   onRowAdd: newData =>
-			//     new Promise(resolve => {
-			//       setTimeout(() => {
-			//         resolve();
-			//         const data = [...state.data];
-			//         data.push(newData);
-			//         setState({ ...state, data });
-			//       }, 600);
-			//     }),
-			//   onRowUpdate: (newData, oldData) =>
-			//     new Promise(resolve => {
-			//       setTimeout(() => {
-			//         resolve();
-			//         const data = [...state.data];
-			//         data[data.indexOf(oldData)] = newData;
-			//         setState({ ...state, data });
-			//       }, 600);
-			//     }),
-			//   onRowDelete: oldData =>
-			//     new Promise(resolve => {
-			//       setTimeout(() => {
-			//         resolve();
-			//         const data = [...state.data];
-			//         data.splice(data.indexOf(oldData), 1);
-			//         setState({ ...state, data });
-			//       }, 600);
-			//     }),
-			// }}
 		/>
 	);
 }
