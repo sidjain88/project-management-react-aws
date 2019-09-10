@@ -7,8 +7,6 @@ export default function MaterialTableDemo() {
 		columns: [
 			{ title: 'Id', field: 'id', hidden: true },
 			{ title: 'Name', field: 'name', defaultSort: 'asc' },
-			// { title: 'Manager', field: 'manager' },
-			// { title: 'Role', field: 'role' },
 			{ title: 'Joined Date', field: 'start_date', type: 'date' }
 		],
 		data: SampleData.map((entry) => Object.assign(entry, { start_date: new Date(entry.start_date) }))
@@ -16,11 +14,11 @@ export default function MaterialTableDemo() {
 
 	return (
 		<MaterialTable
-			title="Active Resources"
+			title="All Resources"
 			columns={state.columns}
 			data={state.data}
 			onRowClick={(event, rowData) => {
-				window.location = '/resources/' + rowData.id;
+				window.location = '/resources/' + rowData.resource_id;
 			}}
 		/>
 	);

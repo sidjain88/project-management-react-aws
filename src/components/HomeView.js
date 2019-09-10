@@ -11,6 +11,7 @@ class HomeView extends Component {
 				<ActiveProjects />
 				<div className="View-space" />
 				<ActiveResources />
+				<div className="View-space" />
 			</div>
 		);
 	};

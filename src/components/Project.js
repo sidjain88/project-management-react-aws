@@ -8,7 +8,6 @@ import BusinessIcon from '@material-ui/icons/Business';
 import { makeStyles } from '@material-ui/core/styles';
 import { Paper, InputAdornment, TextField } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import ActiveResources from './ActiveResources';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -46,18 +45,17 @@ const Project = (props) => {
 	const classes = useStyles();
 	const isNewProject = props.match.params.id === '0';
 
-	const sampleData =
-	isNewProject
-			? {}
-			: {
-					name: 'Latitude Financial Services 1',
-					manager: 'Alex Smith',
-					budget: 200000,
-					consumed_budget: 75000,
-					project_type: 'Client Project Type 2',
-					start_date: new Date('2017-07-25'),
-					end_date: new Date('2021-06-30')
-				};
+	const sampleData = isNewProject
+		? {}
+		: {
+				name: 'Latitude Financial Services 1',
+				manager: 'Alex Smith',
+				budget: 200000,
+				consumed_budget: 75000,
+				project_type: 'Client Project Type 2',
+				start_date: new Date('2017-07-25'),
+				end_date: new Date('2021-06-30')
+			};
 
 	const [ state, setState ] = React.useState({
 		projectData: sampleData,
@@ -163,15 +161,15 @@ const Project = (props) => {
 						<Grid container justify="flex-end">
 							<Grid item xs={2}>
 								<IconButton color="primary" onClick={onActionButtonOneClick}>
-									{state.editMode ? <SaveIcon fontSize="medium" /> : <EditIcon fontSize="medium" />}
+									{state.editMode ? <SaveIcon fontSize="default" /> : <EditIcon fontSize="default" />}
 								</IconButton>
 							</Grid>
 							<Grid item xs={2}>
 								<IconButton color="default" onClick={onActionButtonTwoClick}>
 									{state.editMode ? (
-										<CancelIcon fontSize="medium" />
+										<CancelIcon fontSize="default" />
 									) : (
-										<ArchiveIcon fontSize="medium" />
+										<ArchiveIcon fontSize="default" />
 									)}
 								</IconButton>
 							</Grid>
@@ -309,37 +307,55 @@ const Project = (props) => {
 
 	const Resources = () => (
 		<MaterialTable
-			title={(isNewProject ? "Available" : "Active") + " Resources"}
+			title={(isNewProject ? 'Available' : 'Active') + ' Resources'}
 			columns={state.resourceColumns}
 			data={state.resourceData}
 			onRowClick={(event, rowData) => {
 				window.location = '/resources/' + rowData.id;
 			}}
-			actions={isNewProject ? [
-				{
-					icon: 'add',
-					tooltip: 'Add to Project',
-					onClick: (event, rowData) => {
-					}
-				}
-			] : [
-				{
-					icon: 'add',
-					isFreeAction: true,
-					tooltip: 'Add to Project',
-					onClick: (event, rowData) => {
-					}
-				},
-				{
-					icon: 'delete',
-					tooltip: 'Remove from Project',
-					onClick: (event, rowData) => {
-					}
-				}
-			]}
+			actions={
+				isNewProject ? (
+					[
+						{
+							icon: 'add',
+							tooltip: 'Add to Project',
+							onClick: (event, rowData) => {}
+						}
+					]
+				) : state.editMode ? (
+					[
+						{
+							icon: 'add',
+							isFreeAction: true,
+							tooltip: 'Add to Project',
+							onClick: (event, rowData) => {}
+						}
+					]
+				) : (
+					[]
+				)
+			}
 			options={{
 				actionsColumnIndex: 2
 			}}
+			localization={{
+				body: {
+					editRow: {
+						deleteText: 'Are you sure you want to remove this resource?'
+					}
+				}
+			}}
+			editable={state.editMode ? {
+				onRowDelete: (oldData) =>
+					new Promise((resolve) => {
+						setTimeout(() => {
+							resolve();
+							const data = [ ...state.data ];
+							data.splice(data.indexOf(oldData), 1);
+							setState({ ...state, data });
+						}, 600);
+					})
+			}: {}}
 		/>
 	);
 

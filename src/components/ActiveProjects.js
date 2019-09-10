@@ -31,7 +31,7 @@ export default function MaterialTableDemo(props) {
 
 	return (
 		<MaterialTable
-			title="Active Projects"
+			title="Ongoing Projects"
 			columns={state.columns}
 			data={state.data}
 			onRowClick={(event, rowData) => {
@@ -54,30 +54,17 @@ export default function MaterialTableDemo(props) {
 					icon: 'edit',
 					tooltip: 'Edit Project',
 					onClick: (event, rowData) => {
-						window.location = '/projects/' + rowData.project_id;
+						//window.location = '/projects/' + rowData.project_id;
+						props.history.push({
+							pathname: '/projects/' + rowData.project_id,
+							data: {
+								editMode: true
+							}
+						  })
 					}
 				},
 			]}
-			//detailPanel={() => (<div>More project details</div>)}
 			editable={{
-				// onRowAdd: (newData) =>
-				// 	new Promise((resolve) => {
-				// 		setTimeout(() => {
-				// 			resolve();
-				// 			const data = [ ...state.data ];
-				// 			data.push(newData);
-				// 			setState({ ...state, data });
-				// 		}, 600);
-				// 	}),
-				// onRowUpdate: (newData, oldData) =>
-				// 	new Promise((resolve) => {
-				// 		setTimeout(() => {
-				// 			resolve();
-				// 			const data = [ ...state.data ];
-				// 			data[data.indexOf(oldData)] = newData;
-				// 			setState({ ...state, data });
-				// 		}, 600);
-				// 	}),
 				onRowDelete: (oldData) =>
 					new Promise((resolve) => {
 						setTimeout(() => {
