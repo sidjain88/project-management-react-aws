@@ -1,6 +1,5 @@
 import React from 'react';
 import MaterialTable from 'material-table';
-import SampleData from '../data/available-resources.json';
 
 export default function MaterialTableDemo(props) {
 	const [ state, setState ] = React.useState({
@@ -12,8 +11,6 @@ export default function MaterialTableDemo(props) {
 			{ title: 'Base Rate', field: 'rate', type: 'numeric' }
 		]
 	});
-
-	console.log('****', props);
 
 	return (
 		<MaterialTable
@@ -44,26 +41,6 @@ export default function MaterialTableDemo(props) {
 						deleteText: 'Are you sure you want to remove this resource?'
 					}
 				}
-			}}
-			editable={{
-				// 	onRowUpdate: (oldData) =>
-				// 		new Promise((resolve) => {
-				// 			setTimeout(() => {
-				// 				resolve();
-				// 				const data = [ ...state.data ];
-				// 				data.splice(data.indexOf(oldData), 1);
-				// 				setState({ ...state, data });
-				// 			}, 600);
-				// 		}),
-				// 	onRowDelete: (oldData) =>
-				// 		new Promise((resolve) => {
-				// 			setTimeout(() => {
-				// 				resolve();
-				// 				const data = [ ...state.data ];
-				// 				data.splice(data.indexOf(oldData), 1);
-				// 				setState({ ...state, data });
-				// 			}, 600);
-				// 		})
 			}}
 		/>
 	);

@@ -1,13 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import MaterialTable from 'material-table';
-import SampleData from '../data/sample-projects.json';
 import Icon from '@material-ui/core/Icon';
 import { graphql, compose, withApollo } from "react-apollo";
 import gql from "graphql-tag";
 import { queryItemsLatestVersionByType } from "../graphql/queries";
 
 function ActiveProjects(props){
-
 
 		const {projects} = props;
 
@@ -93,11 +91,7 @@ function ActiveProjects(props){
 			}}
 		/>
 		);
-
-	
 }
-
-
 
 const ActiveProjectsWithData = withApollo(compose(
     graphql(

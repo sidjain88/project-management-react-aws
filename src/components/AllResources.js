@@ -1,12 +1,13 @@
 import React from 'react';
 import MaterialTable from 'material-table';
-import SampleData from '../data/sample-resources.json';
+import SampleData from '../data/all-resources.json';
 
 export default function MaterialTableDemo() {
 	const [ state, setState ] = React.useState({
 		columns: [
 			{ title: 'Id', field: 'id', hidden: true },
 			{ title: 'Name', field: 'name', defaultSort: 'asc' },
+			{ title: 'Reportin Manager', field: 'manager' },
 			{ title: 'Joined Date', field: 'start_date', type: 'date' }
 		],
 		data: SampleData.map((entry) => Object.assign(entry, { start_date: new Date(entry.start_date) }))

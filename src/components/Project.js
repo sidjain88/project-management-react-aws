@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -17,8 +17,6 @@ import Button from '@material-ui/core/Button';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
-import MaterialTable from 'material-table';
-import ResourceData from '../data/sample-resources.json';
 import { graphql, compose, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { queryItemsLatestVersionByTypeId } from '../graphql/queries';
@@ -51,9 +49,6 @@ function Project(props) {
 	const classes = useStyles();
 	const isNewProject = props.match.params.id === '0';
 	const { project } = props;
-
-	console.log(props);
-
 	const data = isNewProject ? {} : project;
 
 	const [ state, setState ] = React.useState({
@@ -64,7 +59,7 @@ function Project(props) {
 			{ title: 'Name', field: 'name', defaultSort: 'asc' },
 			{ title: 'Joined Date', field: 'start_date', type: 'date' }
 		],
-		editMode: props.match.params.id === '0',
+		editMode: isNewProject,
 		resourceAddMode: false,
 		archivalConfirmationOpen: false
 	});
@@ -94,7 +89,7 @@ function Project(props) {
 	};
 
 	const cancelEditing = () => {
-		setState({ ...state, editMode: false });
+		setState({ ...state, editMode: false, resourceAddMode: false });
 	};
 
 	const archiveProject = () => {
@@ -107,7 +102,6 @@ function Project(props) {
 
 	const confirmArchival = () => {
 		toggleArchiveConfirmation();
-		// Archive API call
 		window.location = '/';
 	};
 
@@ -124,8 +118,19 @@ function Project(props) {
 	};
 
 	const handleChange = (name) => (event) => {
-		console.log(name);
 		setState({ ...state, projectData: { ...state.projectData, [name]: event.target.value } });
+	};
+
+	const onResourceAddStart = () => {
+		setState({ ...state, resourceAddMode: true });
+	};
+
+	const onResourceAdd = (newAllocation) => {
+		setState({ ...state, newAllocations: [ ...state.newAllocations, newAllocation ] });
+	};
+
+	const onResourceAddComplete = () => {
+		setState({ ...state, resourceAddMode: false });
 	};
 
 	const ProjectDetails = () => (
@@ -313,84 +318,6 @@ function Project(props) {
 		</div>
 	);
 
-	const resourceAddMode = () => {
-		return state.editMode || isNewProject;
-	};
-
-	// const ActiveResources = () => (
-	// 	<MaterialTable
-	// 		title={(isNewProject ? 'Available' : 'Active') + ' Resources'}
-	// 		columns={state.resourceColumns}
-	// 		data={state.activeResources}
-	// 		onRowClick={(event, rowData) => {
-	// 			window.location = '/resources/' + rowData.id;
-	// 		}}
-	// 		actions={
-	// 			state.editMode ? (
-	// 				[
-	// 					{
-	// 						icon: 'add_box',
-	// 						isFreeAction: true,
-	// 						tooltip: 'Add New Resources',
-	// 						onClick: (event, rowData) => {
-	// 							// Fetch new resources to put in this table
-	// 							setState({ ...state, resourceAddMode: true });
-	// 						}
-	// 					},
-	// 					{
-	// 						icon: 'edit',
-	// 						tooltip: 'Edit Resource',
-	// 						onClick: (event, rowData) => {}
-	// 					},
-	// 					{
-	// 						icon: 'delete',
-	// 						tooltip: 'Remove Resource',
-	// 						onClick: (event, rowData) => {}
-	// 					}
-	// 				]
-	// 			) : (
-	// 				[]
-	// 			)
-	// 		}
-	// 		options={{
-	// 			actionsColumnIndex: 2
-	// 		}}
-	// 		localization={{
-	// 			body: {
-	// 				editRow: {
-	// 					deleteText: 'Are you sure you want to remove this resource?'
-	// 				}
-	// 			}
-	// 		}}
-	// 		editable={
-	// 			state.editMode ? (
-	// 				{
-	// 					// onRowUpdate: (oldData) =>
-	// 					// 	new Promise((resolve) => {
-	// 					// 		setTimeout(() => {
-	// 					// 			resolve();
-	// 					// 			const data = [ ...state.data ];
-	// 					// 			data.splice(data.indexOf(oldData), 1);
-	// 					// 			setState({ ...state, data });
-	// 					// 		}, 600);
-	// 					// 	}),
-	// 					// onRowDelete: (oldData) =>
-	// 					// 	new Promise((resolve) => {
-	// 					// 		setTimeout(() => {
-	// 					// 			resolve();
-	// 					// 			const data = [ ...state.data ];
-	// 					// 			data.splice(data.indexOf(oldData), 1);
-	// 					// 			setState({ ...state, data });
-	// 					// 		}, 600);
-	// 					// 	})
-	// 				}
-	// 			) : (
-	// 				{}
-	// 			)
-	// 		}
-	// 	/>
-	// );
-
 	const ArchivalConfirmation = () => (
 		<Dialog
 			open={state.archivalConfirmationOpen}
@@ -415,26 +342,15 @@ function Project(props) {
 		</Dialog>
 	);
 
-	const onResourceAddStart = () => {
-		setState({...state, resourceAddMode: true})
-	}
-
-	const onResourceAdd = (newAllocation) => {
-		setState({...state, newAllocations: [...state.newAllocations, newAllocation] })
-		console.log("####@@@", state);
-
-	}
-
-	const onResourceAddComplete = () => {
-		setState({...state, resourceAddMode: false})
-	}
-
 	return (
 		<div className={classes.root}>
 			<ProjectDetails />
 			<div className="View-space" />
-			{!state.resourceAddMode && <Allocations editMode={state.editMode} onResourceAddStart={onResourceAddStart} />}
-			{state.resourceAddMode && <AvailableResources onResourceAdd={onResourceAdd} onResourceAddComplete={onResourceAddComplete} />}
+			{state.resourceAddMode || isNewProject ? (
+				<AvailableResources onResourceAdd={onResourceAdd} onResourceAddComplete={onResourceAddComplete} />
+			) : (
+				<Allocations editMode={state.editMode} onResourceAddStart={onResourceAddStart} />
+			)}
 			{state.editMode &&
 			state.newAllocations.length > 0 && (
 				<div>

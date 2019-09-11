@@ -34,7 +34,6 @@ export default function MaterialTableDemo(props) {
 							iconProps: {color: 'blue'},
 							tooltip: 'Add New Resources',
 							onClick: (event, rowData) => {
-								// Fetch new resources to put in this table
 								props.onResourceAddStart();
 							}
 						},
@@ -63,32 +62,6 @@ export default function MaterialTableDemo(props) {
 					}
 				}
 			}}
-			editable={
-				state.editMode ? (
-					{
-						// onRowUpdate: (oldData) =>
-						// 	new Promise((resolve) => {
-						// 		setTimeout(() => {
-						// 			resolve();
-						// 			const data = [ ...state.data ];
-						// 			data.splice(data.indexOf(oldData), 1);
-						// 			setState({ ...state, data });
-						// 		}, 600);
-						// 	}),
-						// onRowDelete: (oldData) =>
-						// 	new Promise((resolve) => {
-						// 		setTimeout(() => {
-						// 			resolve();
-						// 			const data = [ ...state.data ];
-						// 			data.splice(data.indexOf(oldData), 1);
-						// 			setState({ ...state, data });
-						// 		}, 600);
-						// 	})
-					}
-				) : (
-					{}
-				)
-			}
 		/>
 	);
 }
