@@ -49,7 +49,7 @@ function ActiveProjects(props){
 			}}
 			actions={[
 				{
-					icon: 'add',
+					icon: 'add_box',
 					isFreeAction: true,
 					tooltip: 'Add Project',
 					onClick: (event, rowData) => {

@@ -1,0 +1,9 @@
+[
+	{ "type_id": "resource_1", "name": "(Available) Adam Jones", "manager": "Baran Adams", "rate": 650, "role": "Developer" },
+	{ "type_id": "resource_2", "name": "(Available) Peter Smith", "manager": "Tony James", "rate": 800, "role": "Senior Developer" },
+	{ "type_id": "resource_3", "name": "(Available) John Archer", "manager": "Tony James", "rate": 650, "role": "QA" },
+	{ "type_id": "resource_4", "name": "(Available) Simon Arthur", "manager": "Peter Alex", "rate": 650, "role": "Developer" },
+	{ "type_id": "resource_5", "name": "(Available) Alex Bailey", "manager": "Baran Adams", "rate": 700, "role": "Developer" },
+	{ "type_id": "resource_6", "name": "(Available) Jeffery Chen", "manager": "Peter James", "rate": 700, "role": "Business Analyst" },
+	{ "type_id": "resource_7", "name": "(Available) Bill Smith", "manager": "Peter Alex", "rate": 800, "role": "Senior QA" }
+]

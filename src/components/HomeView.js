@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ActiveProjects from './ActiveProjects';
-import ActiveResources from './ActiveResources';
+import AllResources from './AllResources';
 
 import '../App.css';
 
@@ -10,7 +10,7 @@ class HomeView extends Component {
 			<div>
 				<ActiveProjects />
 				<div className="View-space" />
-				<ActiveResources />
+				<AllResources />
 				<div className="View-space" />
 			</div>
 		);

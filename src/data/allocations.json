@@ -1,0 +1,9 @@
+[
+	{ "type_id": "allocation_1", "name": "(Allocation) Adam Jones", "start_date": "2016-01-19", "manager": "Baran Adams", "rate": 650, "role": "Developer" },
+	{ "type_id": "allocation_2", "name": "(Allocation) Peter Smith", "start_date": "2016-02-20", "manager": "Tony James", "rate": 800, "role": "Senior Developer" },
+	{ "type_id": "allocation_3", "name": "(Allocation) John Archer", "start_date": "2016-03-08", "manager": "Tony James", "rate": 650, "role": "QA" },
+	{ "type_id": "allocation_4", "name": "(Allocation) Simon Arthur", "start_date": "2016-04-09", "manager": "Peter Alex", "rate": 650, "role": "Developer" },
+	{ "type_id": "allocation_5", "name": "(Allocation) Alex Bailey", "start_date": "2016-04-13", "manager": "Baran Adams", "rate": 700, "role": "Developer" },
+	{ "type_id": "allocation_6", "name": "(Allocation) Jeffery Chen", "start_date": "2016-06-29", "manager": "Peter James", "rate": 700, "role": "Business Analyst" },
+	{ "type_id": "allocation_7", "name": "(Allocation) Bill Smith", "start_date": "2016-07-24", "manager": "Peter Alex", "rate": 800, "role": "Senior QA" }
+]

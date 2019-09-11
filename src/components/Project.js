@@ -19,53 +19,53 @@ import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/picker
 import moment from 'moment';
 import MaterialTable from 'material-table';
 import ResourceData from '../data/sample-resources.json';
-import { graphql, compose, withApollo } from "react-apollo";
-import gql from "graphql-tag";
-import { queryItemsLatestVersionByTypeId } from "../graphql/queries";
+import { graphql, compose, withApollo } from 'react-apollo';
+import gql from 'graphql-tag';
+import { queryItemsLatestVersionByTypeId } from '../graphql/queries';
+import Allocations from './Allocations';
+import AvailableResources from './AvailableResources';
+import NewAllocations from './NewAllocations';
 
-function Project(props){
-	
-const useStyles = makeStyles((theme) => ({
-	root: {
-		flexGrow: 1
-	},
-	fab: {
-		margin: theme.spacing(1)
-	},
-	button: {
-		margin: theme.spacing(1)
-	},
-	paper: {
-		padding: theme.spacing(2),
-		textAlign: 'center',
-		color: theme.palette.text.primary
-	},
-	textField: {
-		marginLeft: theme.spacing(1),
-		marginRight: theme.spacing(1)
-	}
-}));
+function Project(props) {
+	const useStyles = makeStyles((theme) => ({
+		root: {
+			flexGrow: 1
+		},
+		fab: {
+			margin: theme.spacing(1)
+		},
+		button: {
+			margin: theme.spacing(1)
+		},
+		paper: {
+			padding: theme.spacing(2),
+			textAlign: 'center',
+			color: theme.palette.text.primary
+		},
+		textField: {
+			marginLeft: theme.spacing(1),
+			marginRight: theme.spacing(1)
+		}
+	}));
 
 	const classes = useStyles();
 	const isNewProject = props.match.params.id === '0';
-	const {project} = props;
+	const { project } = props;
 
 	console.log(props);
 
-	const data =
-	isNewProject
-			? {}
-			: project;
+	const data = isNewProject ? {} : project;
 
 	const [ state, setState ] = React.useState({
 		projectData: data,
-		resourceData: ResourceData.map((entry) => Object.assign(entry, { start_date: new Date(entry.start_date) })),
+		newAllocations: [],
 		resourceColumns: [
 			{ title: 'Id', field: 'id', hidden: true },
 			{ title: 'Name', field: 'name', defaultSort: 'asc' },
 			{ title: 'Joined Date', field: 'start_date', type: 'date' }
 		],
 		editMode: props.match.params.id === '0',
+		resourceAddMode: false,
 		archivalConfirmationOpen: false
 	});
 
@@ -130,238 +130,266 @@ const useStyles = makeStyles((theme) => ({
 
 	const ProjectDetails = () => (
 		<div>
-			{ state.projectData &&
-			<Grid container spacing={2}>
-			<Grid item xs={12}>
+			{state.projectData && (
 				<Grid container spacing={2}>
-					<Grid item xs={8}>
+					<Grid item xs={12}>
 						<Grid container spacing={2}>
-							<Grid item xs={1}>
-								<IconButton color="default" aria-label="business">
-									<BusinessIcon fontSize="large" />
-								</IconButton>
+							<Grid item xs={8}>
+								<Grid container spacing={2}>
+									<Grid item xs={1}>
+										<IconButton color="default" aria-label="business">
+											<BusinessIcon fontSize="large" />
+										</IconButton>
+									</Grid>
+									<Grid item xs={11}>
+										<TextField
+											id="project_name"
+											className={classes.textField}
+											placeholder="Project Name"
+											margin="normal"
+											value={state.projectData.name}
+											onChange={handleChange('name')}
+											label={state.editMode ? 'Project Name' : null}
+											inputProps={{
+												'aria-label': 'bare',
+												readOnly: !state.editMode
+											}}
+											fullWidth
+										/>
+									</Grid>
+								</Grid>
 							</Grid>
-							<Grid item xs={11}>
-								<TextField
-									id="project_name"
-									className={classes.textField}
-									placeholder="Project Name"
-									margin="normal"
-									value={state.projectData.name}
-									onChange={handleChange('name')}
-									label={state.editMode ? 'Project Name' : null}
-									inputProps={{
-										'aria-label': 'bare',
-										readOnly: !state.editMode
-									}}
-									fullWidth
-								/>
+							<Grid item xs={4}>
+								<Grid container justify="flex-end">
+									<Grid item xs={2}>
+										<IconButton color="primary" onClick={onActionButtonOneClick}>
+											{state.editMode ? (
+												<SaveIcon fontSize="default" />
+											) : (
+												<EditIcon fontSize="default" />
+											)}
+										</IconButton>
+									</Grid>
+									<Grid item xs={2}>
+										<IconButton color="default" onClick={onActionButtonTwoClick}>
+											{state.editMode ? (
+												<CancelIcon fontSize="default" />
+											) : (
+												<ArchiveIcon fontSize="default" />
+											)}
+										</IconButton>
+									</Grid>
+								</Grid>
 							</Grid>
 						</Grid>
 					</Grid>
 					<Grid item xs={4}>
-						<Grid container justify="flex-end">
-							<Grid item xs={2}>
-								<IconButton color="primary" onClick={onActionButtonOneClick}>
-									{state.editMode ? <SaveIcon fontSize="default" /> : <EditIcon fontSize="default" />}
-								</IconButton>
-							</Grid>
-							<Grid item xs={2}>
-								<IconButton color="default" onClick={onActionButtonTwoClick}>
-									{state.editMode ? (
-										<CancelIcon fontSize="default" />
-									) : (
-										<ArchiveIcon fontSize="default" />
-									)}
-								</IconButton>
-							</Grid>
-						</Grid>
+						<Paper className={classes.paper}>
+							<TextField
+								id="project_manager"
+								fullWidth
+								label="Project Manager"
+								value={state.projectData.manager}
+								onChange={handleChange('manager')}
+								className={classes.textField}
+								margin="normal"
+								variant={state.editMode ? 'standard' : 'outlined'}
+								inputProps={{
+									readOnly: !state.editMode
+								}}
+							/>
+							<TextField
+								id="project_type"
+								fullWidth
+								label="Type"
+								value={state.projectData.project_type}
+								onChange={handleChange('project_type')}
+								className={classes.textField}
+								margin="normal"
+								variant={state.editMode ? 'standard' : 'outlined'}
+								InputProps={{
+									readOnly: !state.editMode
+								}}
+							/>
+						</Paper>
+					</Grid>
+					<Grid item xs={4}>
+						<Paper className={classes.paper}>
+							<TextField
+								id="budget"
+								fullWidth
+								label="Budget"
+								value={state.projectData.budget}
+								onChange={handleChange('budget')}
+								className={classes.textField}
+								margin="normal"
+								variant={state.editMode ? 'standard' : 'outlined'}
+								type="number"
+								InputProps={{
+									readOnly: !state.editMode,
+									startAdornment: <InputAdornment position="start">AUD</InputAdornment>
+								}}
+							/>
+							<TextField
+								id="consumed_budget"
+								fullWidth
+								label="Consumed Budget"
+								value={state.projectData.consumed_budget}
+								onChange={handleChange('consumed_budget')}
+								className={classes.textField}
+								margin="normal"
+								variant={state.editMode ? 'standard' : 'outlined'}
+								type="number"
+								InputProps={{
+									readOnly: !state.editMode,
+									startAdornment: <InputAdornment position="start">AUD</InputAdornment>
+								}}
+							/>
+						</Paper>
+					</Grid>
+					<Grid item xs={4}>
+						<Paper className={classes.paper}>
+							{state.editMode ? (
+								<MuiPickersUtilsProvider utils={DateFnsUtils}>
+									<Grid container justify="space-around">
+										<KeyboardDatePicker
+											fullWidth
+											variant="inline"
+											format="dd/MM/yyyy"
+											margin="normal"
+											label="Start Date"
+											value={state.projectData.start_date}
+											onChange={handleDateChange('start_date')}
+											KeyboardButtonProps={{
+												'aria-label': 'change date'
+											}}
+										/>
+										<KeyboardDatePicker
+											fullWidth
+											variant="inline"
+											format="dd/MM/yyyy"
+											margin="normal"
+											label="End Date"
+											value={state.projectData.end_date}
+											onChange={handleDateChange('end_date')}
+											KeyboardButtonProps={{
+												'aria-label': 'change date'
+											}}
+										/>
+									</Grid>
+								</MuiPickersUtilsProvider>
+							) : (
+								<div>
+									<TextField
+										id="start_date"
+										fullWidth
+										label="Start Date"
+										value={formatDate(state.projectData.start_date)}
+										className={classes.textField}
+										margin="normal"
+										variant={state.editMode ? 'filled' : 'outlined'}
+										InputProps={{
+											readOnly: !state.editMode
+										}}
+									/>
+									<TextField
+										id="end_date"
+										label="End Date"
+										value={formatDate(state.projectData.end_date)}
+										className={classes.textField}
+										margin="normal"
+										fullWidth
+										variant={state.editMode ? 'filled' : 'outlined'}
+										InputProps={{
+											readOnly: !state.editMode
+										}}
+									/>
+								</div>
+							)}
+						</Paper>
 					</Grid>
 				</Grid>
-			</Grid>
-			<Grid item xs={4}>
-				<Paper className={classes.paper}>
-					<TextField
-						id="project_manager"
-						fullWidth
-						label="Project Manager"
-						value={state.projectData.manager}
-						onChange={handleChange('manager')}
-						className={classes.textField}
-						margin="normal"
-						variant={state.editMode ? 'standard' : 'outlined'}
-						inputProps={{
-							readOnly: !state.editMode
-						}}
-					/>
-					<TextField
-						id="project_type"
-						fullWidth
-						label="Type"
-						value={state.projectData.project_type}
-						onChange={handleChange('project_type')}
-						className={classes.textField}
-						margin="normal"
-						variant={state.editMode ? 'standard' : 'outlined'}
-						InputProps={{
-							readOnly: !state.editMode
-						}}
-					/>
-				</Paper>
-			</Grid>
-			<Grid item xs={4}>
-				<Paper className={classes.paper}>
-					<TextField
-						id="budget"
-						fullWidth
-						label="Budget"
-						value={state.projectData.budget}
-						onChange={handleChange('budget')}
-						className={classes.textField}
-						margin="normal"
-						variant={state.editMode ? 'standard' : 'outlined'}
-						type="number"
-						InputProps={{
-							readOnly: !state.editMode,
-							startAdornment: <InputAdornment position="start">AUD</InputAdornment>
-						}}
-					/>
-					<TextField
-						id="consumed_budget"
-						fullWidth
-						label="Consumed Budget"
-						value={state.projectData.consumed_budget}
-						onChange={handleChange('consumed_budget')}
-						className={classes.textField}
-						margin="normal"
-						variant={state.editMode ? 'standard' : 'outlined'}
-						type="number"
-						InputProps={{
-							readOnly: !state.editMode,
-							startAdornment: <InputAdornment position="start">AUD</InputAdornment>
-						}}
-					/>
-				</Paper>
-			</Grid>
-			<Grid item xs={4}>
-				<Paper className={classes.paper}>
-					{state.editMode ? (
-						<MuiPickersUtilsProvider utils={DateFnsUtils}>
-							<Grid container justify="space-around">
-								<KeyboardDatePicker
-									fullWidth
-									variant="inline"
-									format="dd/MM/yyyy"
-									margin="normal"
-									label="Start Date"
-									value={state.projectData.start_date}
-									onChange={handleDateChange('start_date')}
-									KeyboardButtonProps={{
-										'aria-label': 'change date'
-									}}
-								/>
-								<KeyboardDatePicker
-									fullWidth
-									variant="inline"
-									format="dd/MM/yyyy"
-									margin="normal"
-									label="End Date"
-									value={state.projectData.end_date}
-									onChange={handleDateChange('end_date')}
-									KeyboardButtonProps={{
-										'aria-label': 'change date'
-									}}
-								/>
-							</Grid>
-						</MuiPickersUtilsProvider>
-					) : (
-						<div>
-							<TextField
-								id="start_date"
-								fullWidth
-								label="Start Date"
-								value={formatDate(state.projectData.start_date)}
-								className={classes.textField}
-								margin="normal"
-								variant={state.editMode ? 'filled' : 'outlined'}
-								InputProps={{
-									readOnly: !state.editMode
-								}}
-							/>
-							<TextField
-								id="end_date"
-								label="End Date"
-								value={formatDate(state.projectData.end_date)}
-								className={classes.textField}
-								margin="normal"
-								fullWidth
-								variant={state.editMode ? 'filled' : 'outlined'}
-								InputProps={{
-									readOnly: !state.editMode
-								}}
-							/>
-						</div>
-					)}
-				</Paper>
-			</Grid>
-			</Grid>
-			}
+			)}
 		</div>
 	);
 
-	const Resources = () => (
-		<MaterialTable
-			title={(isNewProject ? 'Available' : 'Active') + ' Resources'}
-			columns={state.resourceColumns}
-			data={state.resourceData}
-			onRowClick={(event, rowData) => {
-				window.location = '/resources/' + rowData.id;
-			}}
-			actions={
-				isNewProject ? (
-					[
-						{
-							icon: 'add',
-							tooltip: 'Add to Project',
-							onClick: (event, rowData) => {}
-						}
-					]
-				) : state.editMode ? (
-					[
-						{
-							icon: 'add',
-							isFreeAction: true,
-							tooltip: 'Add to Project',
-							onClick: (event, rowData) => {}
-						}
-					]
-				) : (
-					[]
-				)
-			}
-			options={{
-				actionsColumnIndex: 2
-			}}
-			localization={{
-				body: {
-					editRow: {
-						deleteText: 'Are you sure you want to remove this resource?'
-					}
-				}
-			}}
-			editable={state.editMode ? {
-				onRowDelete: (oldData) =>
-					new Promise((resolve) => {
-						setTimeout(() => {
-							resolve();
-							const data = [ ...state.data ];
-							data.splice(data.indexOf(oldData), 1);
-							setState({ ...state, data });
-						}, 600);
-					})
-			}: {}}
-		/>
-	);
+	const resourceAddMode = () => {
+		return state.editMode || isNewProject;
+	};
+
+	// const ActiveResources = () => (
+	// 	<MaterialTable
+	// 		title={(isNewProject ? 'Available' : 'Active') + ' Resources'}
+	// 		columns={state.resourceColumns}
+	// 		data={state.activeResources}
+	// 		onRowClick={(event, rowData) => {
+	// 			window.location = '/resources/' + rowData.id;
+	// 		}}
+	// 		actions={
+	// 			state.editMode ? (
+	// 				[
+	// 					{
+	// 						icon: 'add_box',
+	// 						isFreeAction: true,
+	// 						tooltip: 'Add New Resources',
+	// 						onClick: (event, rowData) => {
+	// 							// Fetch new resources to put in this table
+	// 							setState({ ...state, resourceAddMode: true });
+	// 						}
+	// 					},
+	// 					{
+	// 						icon: 'edit',
+	// 						tooltip: 'Edit Resource',
+	// 						onClick: (event, rowData) => {}
+	// 					},
+	// 					{
+	// 						icon: 'delete',
+	// 						tooltip: 'Remove Resource',
+	// 						onClick: (event, rowData) => {}
+	// 					}
+	// 				]
+	// 			) : (
+	// 				[]
+	// 			)
+	// 		}
+	// 		options={{
+	// 			actionsColumnIndex: 2
+	// 		}}
+	// 		localization={{
+	// 			body: {
+	// 				editRow: {
+	// 					deleteText: 'Are you sure you want to remove this resource?'
+	// 				}
+	// 			}
+	// 		}}
+	// 		editable={
+	// 			state.editMode ? (
+	// 				{
+	// 					// onRowUpdate: (oldData) =>
+	// 					// 	new Promise((resolve) => {
+	// 					// 		setTimeout(() => {
+	// 					// 			resolve();
+	// 					// 			const data = [ ...state.data ];
+	// 					// 			data.splice(data.indexOf(oldData), 1);
+	// 					// 			setState({ ...state, data });
+	// 					// 		}, 600);
+	// 					// 	}),
+	// 					// onRowDelete: (oldData) =>
+	// 					// 	new Promise((resolve) => {
+	// 					// 		setTimeout(() => {
+	// 					// 			resolve();
+	// 					// 			const data = [ ...state.data ];
+	// 					// 			data.splice(data.indexOf(oldData), 1);
+	// 					// 			setState({ ...state, data });
+	// 					// 		}, 600);
+	// 					// 	})
+	// 				}
+	// 			) : (
+	// 				{}
+	// 			)
+	// 		}
+	// 	/>
+	// );
 
 	const ArchivalConfirmation = () => (
 		<Dialog
@@ -387,29 +415,48 @@ const useStyles = makeStyles((theme) => ({
 		</Dialog>
 	);
 
+	const onResourceAddStart = () => {
+		setState({...state, resourceAddMode: true})
+	}
+
+	const onResourceAdd = (newAllocation) => {
+		setState({...state, newAllocations: [...state.newAllocations, newAllocation] })
+		console.log("####@@@", state);
+
+	}
+
+	const onResourceAddComplete = () => {
+		setState({...state, resourceAddMode: false})
+	}
+
 	return (
 		<div className={classes.root}>
-			
 			<ProjectDetails />
 			<div className="View-space" />
-			<Resources />
+			{!state.resourceAddMode && <Allocations editMode={state.editMode} onResourceAddStart={onResourceAddStart} />}
+			{state.resourceAddMode && <AvailableResources onResourceAdd={onResourceAdd} onResourceAddComplete={onResourceAddComplete} />}
+			{state.editMode &&
+			state.newAllocations.length > 0 && (
+				<div>
+					<div className="View-space" />
+					<NewAllocations allocations={state.newAllocations} />
+				</div>
+			)}
 			<ArchivalConfirmation />
-			
 		</div>
 	);
 }
 
-export default withApollo(compose(
-    graphql(
-        gql(queryItemsLatestVersionByTypeId),
-    {
-        options: ({ match: { params: { id } } }) => ({
-            variables: {  type_id: id },
-            fetchPolicy: 'network-only',
-        }),
-        props: ({ data: { queryItemsLatestVersionByTypeId= {items: []} } }) => ({
-            project : queryItemsLatestVersionByTypeId.items[0]
-        }),
-    }
-)
-)(Project));
+export default withApollo(
+	compose(
+		graphql(gql(queryItemsLatestVersionByTypeId), {
+			options: ({ match: { params: { id } } }) => ({
+				variables: { type_id: id },
+				fetchPolicy: 'network-only'
+			}),
+			props: ({ data: { queryItemsLatestVersionByTypeId = { items: [] } } }) => ({
+				project: queryItemsLatestVersionByTypeId.items[0]
+			})
+		})
+	)(Project)
+);
