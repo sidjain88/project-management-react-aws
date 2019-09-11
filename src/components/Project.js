@@ -21,10 +21,10 @@ import Allocations from './Allocations';
 import AvailableResources from './AvailableResources';
 import NewAllocations from './NewAllocations';
 import Tooltip from '@material-ui/core/Tooltip';
-import { graphql, compose, withApollo } from "react-apollo";
-import gql from "graphql-tag";
-import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType } from "../graphql/queries";
-import { updateItem } from "../graphql/mutations";
+import { graphql, compose, withApollo } from 'react-apollo';
+import gql from 'graphql-tag';
+import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType } from '../graphql/queries';
+import { updateItem } from '../graphql/mutations';
 
 function Project(props) {
 	const useStyles = makeStyles((theme) => ({
@@ -57,7 +57,7 @@ function Project(props) {
 		projectData: data,
 		newAllocations: [],
 		editMode: isNewProject,
-		addAllocationMode: false,
+		addAllocationMode: isNewProject,
 		archivalConfirmationOpen: false
 	});
 
@@ -81,18 +81,16 @@ function Project(props) {
 		setState({ ...state, editMode: true, newAllocations: [] });
 	};
 
-	const saveProject = async() => {
-		const project = {...state.projectData};
-		delete project['__typename']
-		const {updateProject} = props;
+	const saveProject = async () => {
+		const project = { ...state.projectData };
+		delete project['__typename'];
+		const { updateProject } = props;
 		await updateProject({ ...project });
 		cancelEditing();
 	};
 
 	const cancelEditing = () => {
 		setState({ ...state, editMode: false, addAllocationMode: false });
-		const {history} = props;
-		history.push('/projects/'+project.type_id);
 	};
 
 	const archiveProject = () => {
@@ -137,9 +135,9 @@ function Project(props) {
 	};
 
 	const onRemoveNewAllocation = (newAllocation) => {
-		let updatedAllocations = state.newAllocations.filter(a => a.type_id !== newAllocation.type_id);
+		let updatedAllocations = state.newAllocations.filter((a) => a.type_id !== newAllocation.type_id);
 		setState({ ...state, newAllocations: [ ...updatedAllocations ] });
-	}
+	};
 
 	const ProjectDetails = () => (
 		<div>
@@ -372,7 +370,7 @@ function Project(props) {
 			) : (
 				<Allocations editMode={state.editMode} onResourceAddStart={onResourceAddStart} />
 			)}
-			{state.editMode &&
+			{(state.editMode || (isNewProject && state.addAllocationMode)) &&
 			state.newAllocations.length > 0 && (
 				<div>
 					<div className="View-space" />
@@ -384,30 +382,25 @@ function Project(props) {
 	);
 }
 
-export default withApollo(compose(
-    graphql(
-        gql(queryItemsLatestVersionByTypeId),
-    {
-        options: ({ match: { params: { id } } }) => ({
-            variables: {  type_id: id },
-            fetchPolicy: 'network-only',
-        }),
-        props: ({ data: { queryItemsLatestVersionByTypeId= {items: []} } }) => ({
-            project : queryItemsLatestVersionByTypeId.items[0]
-        }),
-    }
-),
-
-graphql(
-    gql(updateItem),
-    {
-        props: (props) => ({
-            updateProject: (project) => {
-                return props.mutate({
-                    variables: {input: {...project}}
-                })
-            }
-        })
-    }
-)
-)(Project));
+export default withApollo(
+	compose(
+		graphql(gql(queryItemsLatestVersionByTypeId), {
+			options: ({ match: { params: { id } } }) => ({
+				variables: { type_id: id },
+				fetchPolicy: 'network-only'
+			}),
+			props: ({ data: { queryItemsLatestVersionByTypeId = { items: [] } } }) => ({
+				project: queryItemsLatestVersionByTypeId.items[0]
+			})
+		}),
+		graphql(gql(updateItem), {
+			props: (props) => ({
+				updateProject: (project) => {
+					return props.mutate({
+						variables: { input: { ...project } }
+					});
+				}
+			})
+		})
+	)(Project)
+);

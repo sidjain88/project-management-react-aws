@@ -20,7 +20,7 @@ export default function MaterialTableDemo(props) {
 
 	return (
 		<MaterialTable
-			title={'Allocations'}
+			title={'Current Allocations'}
 			columns={state.resourceColumns}
 			data={state.activeResources}
 			onRowClick={(event, rowData) => {
