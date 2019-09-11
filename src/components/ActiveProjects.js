@@ -1,37 +1,39 @@
 import React from 'react';
 import MaterialTable from 'material-table';
 import Icon from '@material-ui/core/Icon';
-import { graphql, compose, withApollo } from "react-apollo";
-import gql from "graphql-tag";
-import { queryItemsLatestVersionByType } from "../graphql/queries";
+import { graphql, compose, withApollo } from 'react-apollo';
+import gql from 'graphql-tag';
+import { queryItemsLatestVersionByType } from '../graphql/queries';
+import ArchiveIcon from '@material-ui/icons/Archive';
+import Tooltip from '@material-ui/core/Tooltip';
 
-function ActiveProjects(props){
+function ActiveProjects(props) {
+	const { projects } = props;
 
-		const {projects} = props;
-
-		const [ state, setState ] = React.useState({
-			columns: [
-				{ title: 'Id', field: 'type_id', hidden: true },
-				{ title: 'Name', field: 'name' },
-				{ title: 'Manager', field: 'manager' },
-				{ title: 'Type', field: 'project_type' },
-				{
-					title: 'Date Started',
-					field: 'start_date',
-					type: 'date',
-					defaultSort: 'desc',
-					customSort: (a, b) => a.start_date - b.start_date
-				},
-				{
-					title: 'End Date',
-					field: 'end_date',
-					type: 'date',
-					customSort: (a, b) => a.start_date - b.start_date
-				}
-			],
-			data: projects.map((entry) =>
-			Object.assign(entry, { start_date: new Date(entry.start_date), end_date: new Date(entry.end_date) }))
-		});
+	const [ state, setState ] = React.useState({
+		columns: [
+			{ title: 'Id', field: 'type_id', hidden: true },
+			{ title: 'Name', field: 'name' },
+			{ title: 'Manager', field: 'manager' },
+			{ title: 'Type', field: 'project_type' },
+			{
+				title: 'Date Started',
+				field: 'start_date',
+				type: 'date',
+				defaultSort: 'desc',
+				customSort: (a, b) => a.start_date - b.start_date
+			},
+			{
+				title: 'End Date',
+				field: 'end_date',
+				type: 'date',
+				customSort: (a, b) => a.start_date - b.start_date
+			}
+		],
+		data: projects.map((entry) =>
+			Object.assign(entry, { start_date: new Date(entry.start_date), end_date: new Date(entry.end_date) })
+		)
+	});
 
 	return (
 		<MaterialTable
@@ -43,20 +45,27 @@ function ActiveProjects(props){
 			}}
 			options={{
 				sorting: true,
-				actionsColumnIndex: 5
+				actionsColumnIndex: 5,
+				headerStyle: {
+					backgroundColor: '#EEE'
+				},
+				rowStyle: {
+					backgroundColor: '#FFF'
+				}
 			}}
 			actions={[
 				{
 					icon: 'add_box',
+					iconProps: { color: 'primary' },
 					isFreeAction: true,
-					tooltip: 'Add Project',
+					tooltip: 'Add project',
 					onClick: (event, rowData) => {
 						window.location = '/projects/0';
 					}
 				},
 				{
 					icon: 'edit',
-					tooltip: 'Edit Project',
+					tooltip: 'Edit project',
 					onClick: (event, rowData) => {
 						//window.location = '/projects/' + rowData.type_id;
 						this.props.history.push({
@@ -64,9 +73,9 @@ function ActiveProjects(props){
 							data: {
 								editMode: true
 							}
-						  })
+						});
 					}
-				},
+				}
 			]}
 			editable={{
 				onRowDelete: (oldData) =>
@@ -87,25 +96,28 @@ function ActiveProjects(props){
 				}
 			}}
 			icons={{
-				Delete: React.forwardRef((props, ref) => <Icon {...props} ref={ref}>archive</Icon>)
+				Delete: React.forwardRef((props, ref) => (
+					<Tooltip title="Archive project">
+						<ArchiveIcon />
+					</Tooltip>
+				))
 			}}
 		/>
-		);
+	);
 }
 
-const ActiveProjectsWithData = withApollo(compose(
-    graphql(
-        gql(queryItemsLatestVersionByType),
-    {
-        options: () => ({
-            variables: {  type: "project" },
-            fetchPolicy: 'network-only',
-        }),
-        props: ({ data: { queryItemsLatestVersionByType= {items: []} } }) => ({
-            projects : queryItemsLatestVersionByType.items
-        }),
-    }
-)
-)(ActiveProjects));
+const ActiveProjectsWithData = withApollo(
+	compose(
+		graphql(gql(queryItemsLatestVersionByType), {
+			options: () => ({
+				variables: { type: 'project' },
+				fetchPolicy: 'network-only'
+			}),
+			props: ({ data: { queryItemsLatestVersionByType = { items: [] } } }) => ({
+				projects: queryItemsLatestVersionByType.items
+			})
+		})
+	)(ActiveProjects)
+);
 
 export default ActiveProjectsWithData;

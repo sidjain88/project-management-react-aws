@@ -23,6 +23,7 @@ import { queryItemsLatestVersionByTypeId } from '../graphql/queries';
 import Allocations from './Allocations';
 import AvailableResources from './AvailableResources';
 import NewAllocations from './NewAllocations';
+import Tooltip from '@material-ui/core/Tooltip';
 
 function Project(props) {
 	const useStyles = makeStyles((theme) => ({
@@ -54,13 +55,8 @@ function Project(props) {
 	const [ state, setState ] = React.useState({
 		projectData: data,
 		newAllocations: [],
-		resourceColumns: [
-			{ title: 'Id', field: 'id', hidden: true },
-			{ title: 'Name', field: 'name', defaultSort: 'asc' },
-			{ title: 'Joined Date', field: 'start_date', type: 'date' }
-		],
 		editMode: isNewProject,
-		resourceAddMode: false,
+		addAllocationMode: false,
 		archivalConfirmationOpen: false
 	});
 
@@ -81,7 +77,7 @@ function Project(props) {
 	};
 
 	const editProject = () => {
-		setState({ ...state, editMode: true });
+		setState({ ...state, editMode: true, newAllocations: [] });
 	};
 
 	const saveProject = () => {
@@ -89,7 +85,7 @@ function Project(props) {
 	};
 
 	const cancelEditing = () => {
-		setState({ ...state, editMode: false, resourceAddMode: false });
+		setState({ ...state, editMode: false, addAllocationMode: false });
 	};
 
 	const archiveProject = () => {
@@ -122,7 +118,7 @@ function Project(props) {
 	};
 
 	const onResourceAddStart = () => {
-		setState({ ...state, resourceAddMode: true });
+		setState({ ...state, addAllocationMode: true });
 	};
 
 	const onResourceAdd = (newAllocation) => {
@@ -130,8 +126,13 @@ function Project(props) {
 	};
 
 	const onResourceAddComplete = () => {
-		setState({ ...state, resourceAddMode: false });
+		setState({ ...state, addAllocationMode: false });
 	};
+
+	const onRemoveNewAllocation = (newAllocation) => {
+		let updatedAllocations = state.newAllocations.filter(a => a.type_id !== newAllocation.type_id);
+		setState({ ...state, newAllocations: [ ...updatedAllocations ] });
+	}
 
 	const ProjectDetails = () => (
 		<div>
@@ -142,7 +143,7 @@ function Project(props) {
 							<Grid item xs={8}>
 								<Grid container spacing={2}>
 									<Grid item xs={1}>
-										<IconButton color="default" aria-label="business">
+										<IconButton aria-label="business">
 											<BusinessIcon fontSize="large" />
 										</IconButton>
 									</Grid>
@@ -169,18 +170,26 @@ function Project(props) {
 									<Grid item xs={2}>
 										<IconButton color="primary" onClick={onActionButtonOneClick}>
 											{state.editMode ? (
-												<SaveIcon fontSize="default" />
+												<Tooltip title="Save project">
+													<SaveIcon fontSize="large" />
+												</Tooltip>
 											) : (
-												<EditIcon fontSize="default" />
+												<Tooltip title="Edit project">
+													<EditIcon fontSize="large" />
+												</Tooltip>
 											)}
 										</IconButton>
 									</Grid>
 									<Grid item xs={2}>
 										<IconButton color="default" onClick={onActionButtonTwoClick}>
 											{state.editMode ? (
-												<CancelIcon fontSize="default" />
+												<Tooltip title="Dischard changes">
+													<CancelIcon fontSize="large" />
+												</Tooltip>
 											) : (
-												<ArchiveIcon fontSize="default" />
+												<Tooltip title="Archive project">
+													<ArchiveIcon fontSize="large" />
+												</Tooltip>
 											)}
 										</IconButton>
 									</Grid>
@@ -346,8 +355,13 @@ function Project(props) {
 		<div className={classes.root}>
 			<ProjectDetails />
 			<div className="View-space" />
-			{state.resourceAddMode || isNewProject ? (
-				<AvailableResources onResourceAdd={onResourceAdd} onResourceAddComplete={onResourceAddComplete} />
+			{state.addAllocationMode || isNewProject ? (
+				<AvailableResources
+					isNewProject={isNewProject}
+					newAllocations={state.newAllocations}
+					onResourceAdd={onResourceAdd}
+					onResourceAddComplete={onResourceAddComplete}
+				/>
 			) : (
 				<Allocations editMode={state.editMode} onResourceAddStart={onResourceAddStart} />
 			)}
@@ -355,7 +369,7 @@ function Project(props) {
 			state.newAllocations.length > 0 && (
 				<div>
 					<div className="View-space" />
-					<NewAllocations allocations={state.newAllocations} />
+					<NewAllocations allocations={state.newAllocations} onRemoveNewAllocation={onRemoveNewAllocation} />
 				</div>
 			)}
 			<ArchivalConfirmation />

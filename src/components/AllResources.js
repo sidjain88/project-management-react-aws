@@ -7,7 +7,7 @@ export default function MaterialTableDemo() {
 		columns: [
 			{ title: 'Id', field: 'id', hidden: true },
 			{ title: 'Name', field: 'name', defaultSort: 'asc' },
-			{ title: 'Reportin Manager', field: 'manager' },
+			{ title: 'Reporting Manager', field: 'manager' },
 			{ title: 'Joined Date', field: 'start_date', type: 'date' }
 		],
 		data: SampleData.map((entry) => Object.assign(entry, { start_date: new Date(entry.start_date) }))
@@ -20,6 +20,14 @@ export default function MaterialTableDemo() {
 			data={state.data}
 			onRowClick={(event, rowData) => {
 				window.location = '/resources/' + rowData.resource_id;
+			}}
+			options={{
+				headerStyle: {
+					backgroundColor: '#EEE'
+				},
+				rowStyle: {
+					backgroundColor: '#FFF'
+				}
 			}}
 		/>
 	);

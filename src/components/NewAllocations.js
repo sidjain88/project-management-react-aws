@@ -29,16 +29,24 @@ export default function MaterialTableDemo(props) {
 				{
 					icon: 'delete',
 					tooltip: 'Remove allocation',
-					onClick: (event, rowData) => {}
+					onClick: (event, rowData) => {
+						props.onRemoveNewAllocation(rowData);
+					}
 				}
 			]}
 			options={{
-				actionsColumnIndex: 5
+				actionsColumnIndex: 5,
+				headerStyle: {
+					backgroundColor: '#EEE'
+				},
+				rowStyle: {
+					backgroundColor: '#FFF'
+				}
 			}}
 			localization={{
 				body: {
 					editRow: {
-						deleteText: 'Are you sure you want to remove this resource?'
+						deleteText: 'Are you sure you want to remove this allocation?'
 					}
 				}
 			}}

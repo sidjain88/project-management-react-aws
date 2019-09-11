@@ -14,34 +14,51 @@ export default function MaterialTableDemo(props) {
 		data: SampleData
 	});
 
+	const isAllocated = (resource) => props.newAllocations.map((a) => a.type_id).includes(resource.type_id);
+
 	return (
 		<MaterialTable
 			title={'Available Resources'}
 			columns={state.columns}
 			data={state.data}
-			onRowClick={(event, rowData) => {
-				window.location = '/resources/' + rowData.type_id;
-			}}
 			actions={[
-				{
-					icon: 'add',
-					tooltip: 'Add to Project',
-					onClick: (event, rowData) => {
-						console.log("####", rowData)
-						props.onResourceAdd(rowData)
-					}
+				(rowData) => {
+					return isAllocated(rowData)
+						? {
+								icon: 'add_circle',
+								disabled: true
+							}
+						: {
+								icon: 'add_circle',
+								tooltip: 'Allocate to project',
+								onClick: (event, rowData) => {
+									console.log('####', rowData);
+									props.onResourceAdd(rowData);
+								}
+							};
 				},
 				{
 					icon: 'check_circle',
+					hidden: props.isNewProject,
 					isFreeAction: true,
+					iconProps: { color: 'primary' },
 					tooltip: 'Close',
 					onClick: (event, rowData) => {
 						props.onResourceAddComplete();
 					}
 				}
 			]}
+			editable={{
+				//isEditable: (rowData) => props.newAllocations.map(a => a.type_id).includes(rowData.type_id),
+			}}
 			options={{
-				actionsColumnIndex: 5
+				actionsColumnIndex: 5,
+				headerStyle: {
+					backgroundColor: '#EEE'
+				},
+				rowStyle: {
+					backgroundColor: '#FFF'
+				}
 			}}
 			localization={{
 				body: {
