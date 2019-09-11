@@ -31,7 +31,6 @@ export default function MaterialTableDemo(props) {
 						{
 							icon: 'add_box',
 							isFreeAction: true,
-							iconProps: {color: 'blue'},
 							tooltip: 'Add New Resources',
 							onClick: (event, rowData) => {
 								props.onResourceAddStart();

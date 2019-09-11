@@ -17,12 +17,13 @@ import Button from '@material-ui/core/Button';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
-import { graphql, compose, withApollo } from 'react-apollo';
-import gql from 'graphql-tag';
-import { queryItemsLatestVersionByTypeId } from '../graphql/queries';
 import Allocations from './Allocations';
 import AvailableResources from './AvailableResources';
 import NewAllocations from './NewAllocations';
+import { graphql, compose, withApollo } from "react-apollo";
+import gql from "graphql-tag";
+import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType } from "../graphql/queries";
+import { updateItem } from "../graphql/mutations";
 
 function Project(props) {
 	const useStyles = makeStyles((theme) => ({
@@ -84,12 +85,18 @@ function Project(props) {
 		setState({ ...state, editMode: true });
 	};
 
-	const saveProject = () => {
-		setState({ ...state, editMode: false });
+	const saveProject = async() => {
+		const project = {...state.projectData};
+		delete project['__typename']
+		const {updateProject} = props;
+		await updateProject({ ...project });
+		cancelEditing();
 	};
 
 	const cancelEditing = () => {
 		setState({ ...state, editMode: false, resourceAddMode: false });
+		const {history} = props;
+		history.push('/projects/'+project.type_id);
 	};
 
 	const archiveProject = () => {
@@ -363,16 +370,30 @@ function Project(props) {
 	);
 }
 
-export default withApollo(
-	compose(
-		graphql(gql(queryItemsLatestVersionByTypeId), {
-			options: ({ match: { params: { id } } }) => ({
-				variables: { type_id: id },
-				fetchPolicy: 'network-only'
-			}),
-			props: ({ data: { queryItemsLatestVersionByTypeId = { items: [] } } }) => ({
-				project: queryItemsLatestVersionByTypeId.items[0]
-			})
-		})
-	)(Project)
-);
+export default withApollo(compose(
+    graphql(
+        gql(queryItemsLatestVersionByTypeId),
+    {
+        options: ({ match: { params: { id } } }) => ({
+            variables: {  type_id: id },
+            fetchPolicy: 'network-only',
+        }),
+        props: ({ data: { queryItemsLatestVersionByTypeId= {items: []} } }) => ({
+            project : queryItemsLatestVersionByTypeId.items[0]
+        }),
+    }
+),
+
+graphql(
+    gql(updateItem),
+    {
+        props: (props) => ({
+            updateProject: (project) => {
+                return props.mutate({
+                    variables: {input: {...project}}
+                })
+            }
+        })
+    }
+)
+)(Project));
