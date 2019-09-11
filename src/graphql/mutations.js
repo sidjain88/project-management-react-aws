@@ -3,67 +3,67 @@
 
 export const createItem = `mutation CreateItem($input: CreateItemInput!) {
   createItem(input: $input) {
-    type_id
-    version
-    name
-    project_type
-    manager
     budget
     consumed_budget
+    date
     end_date
-    start_date
-    status
+    hours
+    manager
+    name
     project_id
-    resource_id
+    project_type
     rate
     required_hours
+    resource_id
     role
-    date
-    hours
+    start_date
+    status
+    type_id
+    version
   }
 }
 `;
 export const updateItem = `mutation UpdateItem($input: UpdateItemInput!) {
   updateItem(input: $input) {
-    type_id
-    version
-    name
-    project_type
-    manager
     budget
     consumed_budget
+    date
     end_date
-    start_date
-    status
+    hours
+    manager
+    name
     project_id
-    resource_id
+    project_type
     rate
     required_hours
+    resource_id
     role
-    date
-    hours
+    start_date
+    status
+    type_id
+    version
   }
 }
 `;
 export const deleteItem = `mutation DeleteItem($input: DeleteItemInput!) {
   deleteItem(input: $input) {
-    type_id
-    version
-    name
-    project_type
-    manager
     budget
     consumed_budget
+    date
     end_date
-    start_date
-    status
+    hours
+    manager
+    name
     project_id
-    resource_id
+    project_type
     rate
     required_hours
+    resource_id
     role
-    date
-    hours
+    start_date
+    status
+    type_id
+    version
   }
 }
 `;

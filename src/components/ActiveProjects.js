@@ -1,33 +1,39 @@
-import React from 'react';
+import React, { Component } from 'react';
 import MaterialTable from 'material-table';
 import SampleData from '../data/sample-projects.json';
 import Icon from '@material-ui/core/Icon';
+import { graphql, compose, withApollo } from "react-apollo";
+import gql from "graphql-tag";
+import { queryItemsLatestVersionByType } from "../graphql/queries";
 
-export default function MaterialTableDemo(props) {
-	const [ state, setState ] = React.useState({
-		columns: [
-			{ title: 'Id', field: 'project_id', hidden: true },
-			{ title: 'Name', field: 'name' },
-			{ title: 'Manager', field: 'manager' },
-			{ title: 'Type', field: 'project_type' },
-			{
-				title: 'Date Started',
-				field: 'start_date',
-				type: 'date',
-				defaultSort: 'desc',
-				customSort: (a, b) => a.start_date - b.start_date
-			},
-			{
-				title: 'End Date',
-				field: 'end_date',
-				type: 'date',
-				customSort: (a, b) => a.start_date - b.start_date
-			}
-		],
-		data: SampleData.map((entry) =>
-			Object.assign(entry, { start_date: new Date(entry.start_date), end_date: new Date(entry.end_date) })
-		)
-	});
+function ActiveProjects(props){
+
+
+		const {projects} = props;
+
+		const [ state, setState ] = React.useState({
+			columns: [
+				{ title: 'Id', field: 'type_id', hidden: true },
+				{ title: 'Name', field: 'name' },
+				{ title: 'Manager', field: 'manager' },
+				{ title: 'Type', field: 'project_type' },
+				{
+					title: 'Date Started',
+					field: 'start_date',
+					type: 'date',
+					defaultSort: 'desc',
+					customSort: (a, b) => a.start_date - b.start_date
+				},
+				{
+					title: 'End Date',
+					field: 'end_date',
+					type: 'date',
+					customSort: (a, b) => a.start_date - b.start_date
+				}
+			],
+			data: projects.map((entry) =>
+			Object.assign(entry, { start_date: new Date(entry.start_date), end_date: new Date(entry.end_date) }))
+		});
 
 	return (
 		<MaterialTable
@@ -35,7 +41,7 @@ export default function MaterialTableDemo(props) {
 			columns={state.columns}
 			data={state.data}
 			onRowClick={(event, rowData) => {
-				window.location = '/projects/' + rowData.project_id;
+				window.location = '/projects/' + rowData.type_id;
 			}}
 			options={{
 				sorting: true,
@@ -54,9 +60,9 @@ export default function MaterialTableDemo(props) {
 					icon: 'edit',
 					tooltip: 'Edit Project',
 					onClick: (event, rowData) => {
-						//window.location = '/projects/' + rowData.project_id;
-						props.history.push({
-							pathname: '/projects/' + rowData.project_id,
+						//window.location = '/projects/' + rowData.type_id;
+						this.props.history.push({
+							pathname: '/projects/' + rowData.type_id,
 							data: {
 								editMode: true
 							}
@@ -86,5 +92,26 @@ export default function MaterialTableDemo(props) {
 				Delete: React.forwardRef((props, ref) => <Icon {...props} ref={ref}>archive</Icon>)
 			}}
 		/>
-	);
+		);
+
+	
 }
+
+
+
+const ActiveProjectsWithData = withApollo(compose(
+    graphql(
+        gql(queryItemsLatestVersionByType),
+    {
+        options: () => ({
+            variables: {  type: "project" },
+            fetchPolicy: 'network-only',
+        }),
+        props: ({ data: { queryItemsLatestVersionByType= {items: []} } }) => ({
+            projects : queryItemsLatestVersionByType.items
+        }),
+    }
+)
+)(ActiveProjects));
+
+export default ActiveProjectsWithData;

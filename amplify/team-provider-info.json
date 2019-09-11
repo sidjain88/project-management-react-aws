@@ -10,5 +10,17 @@
             "StackName": "projects-dev-20190906121528",
             "StackId": "arn:aws:cloudformation:us-east-1:623684341123:stack/projects-dev-20190906121528/324538c0-d04c-11e9-92b9-1251e602a9c6"
         }
+    },
+    "devb": {
+        "awscloudformation": {
+            "AuthRoleName": "projects-devb-20190909155007-authRole",
+            "UnauthRoleArn": "arn:aws:iam::666349142035:role/projects-devb-20190909155007-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::666349142035:role/projects-devb-20190909155007-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "projects-devb-20190909155007-deployment",
+            "UnauthRoleName": "projects-devb-20190909155007-unauthRole",
+            "StackName": "projects-devb-20190909155007",
+            "StackId": "arn:aws:cloudformation:us-east-1:666349142035:stack/projects-devb-20190909155007/ae3f8720-d2c5-11e9-881c-123cb1b397a4"
+        }
     }
 }

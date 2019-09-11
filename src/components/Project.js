@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -19,7 +19,12 @@ import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/picker
 import moment from 'moment';
 import MaterialTable from 'material-table';
 import ResourceData from '../data/sample-resources.json';
+import { graphql, compose, withApollo } from "react-apollo";
+import gql from "graphql-tag";
+import { queryItemsLatestVersionByTypeId } from "../graphql/queries";
 
+function Project(props){
+	
 const useStyles = makeStyles((theme) => ({
 	root: {
 		flexGrow: 1
@@ -41,24 +46,19 @@ const useStyles = makeStyles((theme) => ({
 	}
 }));
 
-const Project = (props) => {
 	const classes = useStyles();
 	const isNewProject = props.match.params.id === '0';
+	const {project} = props;
 
-	const sampleData = isNewProject
-		? {}
-		: {
-				name: 'Latitude Financial Services 1',
-				manager: 'Alex Smith',
-				budget: 200000,
-				consumed_budget: 75000,
-				project_type: 'Client Project Type 2',
-				start_date: new Date('2017-07-25'),
-				end_date: new Date('2021-06-30')
-			};
+	console.log(props);
+
+	const data =
+	isNewProject
+			? {}
+			: project;
 
 	const [ state, setState ] = React.useState({
-		projectData: sampleData,
+		projectData: data,
 		resourceData: ResourceData.map((entry) => Object.assign(entry, { start_date: new Date(entry.start_date) })),
 		resourceColumns: [
 			{ title: 'Id', field: 'id', hidden: true },
@@ -129,7 +129,9 @@ const Project = (props) => {
 	};
 
 	const ProjectDetails = () => (
-		<Grid container spacing={2}>
+		<div>
+			{ state.projectData &&
+			<Grid container spacing={2}>
 			<Grid item xs={12}>
 				<Grid container spacing={2}>
 					<Grid item xs={8}>
@@ -302,7 +304,9 @@ const Project = (props) => {
 					)}
 				</Paper>
 			</Grid>
-		</Grid>
+			</Grid>
+			}
+		</div>
 	);
 
 	const Resources = () => (
@@ -385,12 +389,27 @@ const Project = (props) => {
 
 	return (
 		<div className={classes.root}>
+			
 			<ProjectDetails />
 			<div className="View-space" />
 			<Resources />
 			<ArchivalConfirmation />
+			
 		</div>
 	);
-};
+}
 
-export default Project;
+export default withApollo(compose(
+    graphql(
+        gql(queryItemsLatestVersionByTypeId),
+    {
+        options: ({ match: { params: { id } } }) => ({
+            variables: {  type_id: id },
+            fetchPolicy: 'network-only',
+        }),
+        props: ({ data: { queryItemsLatestVersionByTypeId= {items: []} } }) => ({
+            project : queryItemsLatestVersionByTypeId.items[0]
+        }),
+    }
+)
+)(Project));
