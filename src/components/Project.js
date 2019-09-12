@@ -23,7 +23,7 @@ import NewAllocations from './NewAllocations';
 import Tooltip from '@material-ui/core/Tooltip';
 import { graphql, compose, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
-import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType } from '../graphql/queries';
+import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType, queryItemsLatestVersionByProjectId } from '../graphql/queries';
 import { updateItem } from '../graphql/mutations';
 
 function Project(props) {
@@ -50,7 +50,7 @@ function Project(props) {
 
 	const classes = useStyles();
 	const isNewProject = props.match.params.id === '0';
-	const { project } = props;
+	const { project, allocations, resources } = props;
 	const data = isNewProject ? {} : project;
 
 	const [ state, setState ] = React.useState({
@@ -58,7 +58,8 @@ function Project(props) {
 		newAllocations: [],
 		editMode: isNewProject,
 		addAllocationMode: isNewProject,
-		archivalConfirmationOpen: false
+		archivalConfirmationOpen: false,
+		allocations: allocations
 	});
 
 	const onActionButtonOneClick = () => {
@@ -111,7 +112,7 @@ function Project(props) {
 	};
 
 	const formatDate = (date) => {
-		return moment(date).format('DD/MM/YYYY');
+		return moment(date, 'YYYY-MM-DD').format('Do MMM YY');
 	};
 
 	const handleDateChange = (type) => (newDate) => {
@@ -212,7 +213,6 @@ function Project(props) {
 								onChange={handleChange('manager')}
 								className={classes.textField}
 								margin="normal"
-								variant={state.editMode ? 'standard' : 'outlined'}
 								inputProps={{
 									readOnly: !state.editMode
 								}}
@@ -225,7 +225,6 @@ function Project(props) {
 								onChange={handleChange('project_type')}
 								className={classes.textField}
 								margin="normal"
-								variant={state.editMode ? 'standard' : 'outlined'}
 								InputProps={{
 									readOnly: !state.editMode
 								}}
@@ -242,7 +241,6 @@ function Project(props) {
 								onChange={handleChange('budget')}
 								className={classes.textField}
 								margin="normal"
-								variant={state.editMode ? 'standard' : 'outlined'}
 								type="number"
 								InputProps={{
 									readOnly: !state.editMode,
@@ -257,7 +255,6 @@ function Project(props) {
 								onChange={handleChange('consumed_budget')}
 								className={classes.textField}
 								margin="normal"
-								variant={state.editMode ? 'standard' : 'outlined'}
 								type="number"
 								InputProps={{
 									readOnly: !state.editMode,
@@ -306,7 +303,6 @@ function Project(props) {
 										value={formatDate(state.projectData.start_date)}
 										className={classes.textField}
 										margin="normal"
-										variant={state.editMode ? 'filled' : 'outlined'}
 										InputProps={{
 											readOnly: !state.editMode
 										}}
@@ -318,7 +314,6 @@ function Project(props) {
 										className={classes.textField}
 										margin="normal"
 										fullWidth
-										variant={state.editMode ? 'filled' : 'outlined'}
 										InputProps={{
 											readOnly: !state.editMode
 										}}
@@ -368,7 +363,7 @@ function Project(props) {
 					onResourceAddComplete={onResourceAddComplete}
 				/>
 			) : (
-				<Allocations editMode={state.editMode} onResourceAddStart={onResourceAddStart} />
+				<Allocations resources={resources} allocations={allocations} editMode={state.editMode} onResourceAddStart={onResourceAddStart} />
 			)}
 			{(state.editMode || (isNewProject && state.addAllocationMode)) &&
 			state.newAllocations.length > 0 && (
@@ -393,6 +388,24 @@ export default withApollo(
 				project: queryItemsLatestVersionByTypeId.items[0]
 			})
 		}),
+		graphql(gql(queryItemsLatestVersionByProjectId), {
+			options: ({ match: { params: { id } } }) => ({
+				variables: { project_id: id, type:"allocation" },
+				fetchPolicy: 'network-only'
+			}),
+			props: ({ data: { queryItemsLatestVersionByProjectId = { items: [] } } }) => ({
+				allocations: queryItemsLatestVersionByProjectId.items
+			})
+		}),
+		graphql(gql(queryItemsLatestVersionByType), {
+			options: () => ({
+				variables: { type: 'resource' },
+				fetchPolicy: 'network-only'
+			}),
+			props: ({ data: { queryItemsLatestVersionByType = { items: [] } } }) => ({
+				resources: queryItemsLatestVersionByType.items
+			})
+		}),
 		graphql(gql(updateItem), {
 			props: (props) => ({
 				updateProject: (project) => {
@@ -414,7 +427,25 @@ export default withApollo(
 	
 							proxy.writeQuery({ query : gql(queryItemsLatestVersionByType) , data: d2});
 						},
-						variables: { input: { ...project } }
+						variables: { input: project }
+					});
+				}
+			})
+		}),
+		graphql(gql(updateItem), {
+			props: (props) => ({
+				updateAllocation: (allocation, project) => {
+					return props.mutate({
+						update: (proxy, { data: { updateItem: alloc } }) => {
+							// Update query for all allocations
+							const v2 = { type: "allocation", project_id: project.type_id};
+							const d2 = proxy.readQuery({ query : gql(queryItemsLatestVersionByProjectId) , variables: v2 });
+	
+							d2.queryItemsLatestVersionByProjectId.items =  [ ...d2.queryItemsLatestVersionByProjectId.items.filter(p => p.type_id !== alloc.type_id || p.version !== alloc.version)  , alloc];
+	
+							proxy.writeQuery({ query : gql(queryItemsLatestVersionByProjectId) , data: d2});
+						},
+						variables: { input: allocation }
 					});
 				}
 			})

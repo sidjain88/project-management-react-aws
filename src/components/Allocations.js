@@ -5,14 +5,27 @@ import Delete from '@material-ui/icons/Delete';
 import Tooltip from '@material-ui/core/Tooltip';
 
 export default function MaterialTableDemo(props) {
+
+	const {allocations, resources} = props;
+	
+	allocations.forEach(a => {
+		a.resource = resources.find(r => r.type_id === a.resource_id);
+	});
+
+	let showAllocationSaveIcon = false;
+
+	const resourceNames = {};
+
+	resources.forEach(r => resourceNames[r.type_id] = r.name);
+
 	const [ state, setState ] = React.useState({
-		activeResources: SampleData.map((entry) => Object.assign(entry, { start_date: new Date(entry.start_date) })),
+		data: allocations,
 		resourceColumns: [
-			{ title: 'Id', field: 'id', hidden: true },
-			{ title: 'Name', field: 'name', defaultSort: 'asc' },
-			{ title: 'Joined Date', field: 'start_date', type: 'date' },
+			{ title: 'Id', field: 'type_id', hidden: true },
+			{ title: 'Name', field: 'resource_id', defaultSort: 'asc', lookup: resourceNames },
 			{ title: 'Role', field: 'role' },
-			{ title: 'Project Rate', field: 'rate', type: 'numeric' }
+			{ title: 'Project Rate', field: 'rate', type: 'numeric' },
+			{ title: 'Required Hours', field: 'required_hours', type: 'numeric' }
 		],
 		resourceAddMode: false,
 		archivalConfirmationOpen: false
@@ -20,50 +33,52 @@ export default function MaterialTableDemo(props) {
 
 	return (
 		<MaterialTable
-			title={'Current Allocations'}
+			title={'Allocated Resources'}
 			columns={state.resourceColumns}
-			data={state.activeResources}
+			data={state.data}
 			onRowClick={(event, rowData) => {
 				window.location = '/resources/' + rowData.id;
 			}}
 			actions={[
 				{
-					icon: 'add_box',
-					hidden: !props.editMode,
+					icon: 'save',
+					hidden: !state.showAllocationSaveIcon,
 					isFreeAction: true,
 					iconProps: { color: 'primary' },
-					tooltip: 'Add new allocation',
+					tooltip: 'Save Changes',
 					onClick: (event, rowData) => {
 						props.onResourceAddStart();
 					}
 				},
-				{
-					icon: 'edit',
-					hidden: !props.editMode,
-					tooltip: 'Edit allocation',
-					onClick: (event, rowData) => {
-						//window.location = '/projects/' + rowData.type_id;
-						this.props.history.push({
-							pathname: '/resource/' + rowData.type_id,
-							data: {
-								editMode: true
-							}
-						});
-					}
-				}
 			]}
 			editable={{
-				onRowDelete: props.editMode
-					? (oldData) =>
-							new Promise((resolve) => {
-								setTimeout(() => {
-									resolve();
-									const data = [ ...state.data ];
-									data.splice(data.indexOf(oldData), 1);
-									setState({ ...state, data });
-								}, 600);
-							})
-					: null
+				onRowAdd: newData =>
+					new Promise(resolve => {
+						setTimeout(() => {
+							resolve();
+							const data = [...state.data];
+							data.push(newData);
+							setState({ ...state, data, showAllocationSaveIcon : true });
+						}, 600);
+					}),
+				onRowUpdate: (newData, oldData) =>
+					new Promise(resolve => {
+						setTimeout(() => {
+							resolve();
+							const data = [...state.data];
+							data[data.indexOf(oldData)] = newData;
+							setState({ ...state, data, showAllocationSaveIcon : true });
+						}, 600);
+					}),
+				onRowDelete: oldData =>
+					new Promise(resolve => {
+						setTimeout(() => {
+							resolve();
+							const data = [...state.data];
+							data.splice(data.indexOf(oldData), 1);
+							setState({ ...state, data, showAllocationSaveIcon : true });
+						}, 600);
+					}),
 			}}
 			options={{
 				actionsColumnIndex: 5,

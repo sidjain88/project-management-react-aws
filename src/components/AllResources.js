@@ -1,8 +1,11 @@
 import React from 'react';
 import MaterialTable from 'material-table';
 import SampleData from '../data/all-resources.json';
+import { graphql, compose, withApollo } from 'react-apollo';
+import gql from 'graphql-tag';
+import { queryItemsLatestVersionByType } from '../graphql/queries';
 
-export default function MaterialTableDemo() {
+function AllResources(props) {
 	const [ state, setState ] = React.useState({
 		columns: [
 			{ title: 'Id', field: 'id', hidden: true },
@@ -10,7 +13,7 @@ export default function MaterialTableDemo() {
 			{ title: 'Reporting Manager', field: 'manager' },
 			{ title: 'Joined Date', field: 'start_date', type: 'date' }
 		],
-		data: SampleData.map((entry) => Object.assign(entry, { start_date: new Date(entry.start_date) }))
+		data: props.resources
 	});
 
 	return (
@@ -32,3 +35,17 @@ export default function MaterialTableDemo() {
 		/>
 	);
 }
+
+export default withApollo(
+	compose(
+		graphql(gql(queryItemsLatestVersionByType), {
+			options: () => ({
+				variables: { type: 'resource' },
+				fetchPolicy: 'network-only'
+			}),
+			props: ({ data: { queryItemsLatestVersionByType = { items: [] } } }) => ({
+				resources: queryItemsLatestVersionByType.items
+			})
+		})
+	)(AllResources)
+);
