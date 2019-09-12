@@ -397,6 +397,23 @@ export default withApollo(
 			props: (props) => ({
 				updateProject: (project) => {
 					return props.mutate({
+						update: (proxy, { data: { updateItem: proj } }) => {
+							// Update query for current project
+							const v1 = { type_id: proj.type_id };
+							const d1 = proxy.readQuery({ query : gql(queryItemsLatestVersionByTypeId), variables: v1 });
+	
+							d1.queryItemsLatestVersionByTypeId.items =  [proj];
+	
+							proxy.writeQuery({ query : gql(queryItemsLatestVersionByTypeId), variables: v1, data: d1 });
+
+							// Update query for all projects
+							const v2 = { type: "project"};
+							const d2 = proxy.readQuery({ query : gql(queryItemsLatestVersionByType) , variables: v2 });
+	
+							d2.queryItemsLatestVersionByType.items =  [ ...d2.queryItemsLatestVersionByType.items.filter(p => p.type_id !== proj.type_id || p.version !== proj.version)  , proj];
+	
+							proxy.writeQuery({ query : gql(queryItemsLatestVersionByType) , data: d2});
+						},
 						variables: { input: { ...project } }
 					});
 				}
