@@ -149,3 +149,9 @@ export const queryItemsLatestVersionByTypeId = `query QueryItemsLatestVersionByT
   }
 }
 `;
+export const queryTypeIdsByType = `query QueryTypeIdsByType($type: String!, $first: Int, $after: String) {
+  queryTypeIdsByType(type: $type, first: $first, after: $after) {
+    type_id
+  }
+}
+`;
