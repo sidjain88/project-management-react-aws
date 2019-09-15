@@ -6,13 +6,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 export default function MaterialTableDemo(props) {
 
-	const {allocations, resources} = props;
-	
-	allocations.forEach(a => {
-		a.resource = resources.find(r => r.type_id === a.resource_id);
-	});
-
-	let showAllocationSaveIcon = false;
+	const {allocations, resources, updateAllocation, createAllocation} = props;
 
 	const resourceNames = {};
 
@@ -36,21 +30,6 @@ export default function MaterialTableDemo(props) {
 			title={'Allocated Resources'}
 			columns={state.resourceColumns}
 			data={state.data}
-			onRowClick={(event, rowData) => {
-				window.location = '/resources/' + rowData.id;
-			}}
-			actions={[
-				{
-					icon: 'save',
-					hidden: !state.showAllocationSaveIcon,
-					isFreeAction: true,
-					iconProps: { color: 'primary' },
-					tooltip: 'Save Changes',
-					onClick: (event, rowData) => {
-						props.onResourceAddStart();
-					}
-				},
-			]}
 			editable={{
 				onRowAdd: newData =>
 					new Promise(resolve => {
@@ -58,7 +37,8 @@ export default function MaterialTableDemo(props) {
 							resolve();
 							const data = [...state.data];
 							data.push(newData);
-							setState({ ...state, data, showAllocationSaveIcon : true });
+							setState({ ...state, data });
+							createAllocation(newData);
 						}, 600);
 					}),
 				onRowUpdate: (newData, oldData) =>
@@ -67,7 +47,8 @@ export default function MaterialTableDemo(props) {
 							resolve();
 							const data = [...state.data];
 							data[data.indexOf(oldData)] = newData;
-							setState({ ...state, data, showAllocationSaveIcon : true });
+							setState({ ...state, data });
+							updateAllocation(newData);
 						}, 600);
 					}),
 				onRowDelete: oldData =>
@@ -76,7 +57,7 @@ export default function MaterialTableDemo(props) {
 							resolve();
 							const data = [...state.data];
 							data.splice(data.indexOf(oldData), 1);
-							setState({ ...state, data, showAllocationSaveIcon : true });
+							setState({ ...state, data });
 						}, 600);
 					}),
 			}}
@@ -87,12 +68,15 @@ export default function MaterialTableDemo(props) {
 				},
 				rowStyle: {
 					backgroundColor: '#FFF'
-				}
+				},
+
 			}}
 			localization={{
 				body: {
 					editRow: {
-						deleteText: 'Are you sure you want to remove this allocation?'
+						deleteText: 'Are you sure you want to remove this allocation?',
+						saveTooltip:"Confirm",
+						cancelTooltip:"Cancel"
 					}
 				}
 			}}

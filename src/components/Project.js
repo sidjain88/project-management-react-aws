@@ -23,12 +23,9 @@ import NewAllocations from './NewAllocations';
 import Tooltip from '@material-ui/core/Tooltip';
 import { graphql, compose, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
-import {
-	queryItemsLatestVersionByTypeId,
-	queryItemsLatestVersionByType,
-	queryItemsLatestVersionByProjectId
-} from '../graphql/queries';
-import { updateItem } from '../graphql/mutations';
+import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType, queryItemsLatestVersionByProjectId, queryTypeIdsByType } from '../graphql/queries';
+import { updateItem, createItem, deleteItem } from '../graphql/mutations';
+import {nextId} from '../util/IdGenerator';
 
 function Project(props) {
 	const useStyles = makeStyles((theme) => ({
@@ -54,7 +51,7 @@ function Project(props) {
 
 	const classes = useStyles();
 	const isNewProject = props.match.params.id === '0';
-	const { project, allocations, resources } = props;
+	const { project, allocations, resources, typeIdsForProjects, typeIdsForAllocations, updateProject, updateAllocation, createProject, createAllocation } = props;
 	const data = isNewProject ? {} : project;
 
 	const [ state, setState ] = React.useState({
@@ -87,10 +84,8 @@ function Project(props) {
 	};
 
 	const saveProject = async () => {
-		const project = { ...state.projectData };
-		delete project['__typename'];
-		const { updateProject } = props;
-		await updateProject({ ...project });
+		const project = { ...state.projectData }; 
+		isNewProject?  await createProject(project):await updateProject(project);
 		cancelEditing();
 	};
 
@@ -367,12 +362,13 @@ function Project(props) {
 					onResourceAddComplete={onResourceAddComplete}
 				/>
 			) : (
-				<Allocations
-					resources={resources}
-					allocations={allocations}
-					editMode={state.editMode}
-					onResourceAddStart={onResourceAddStart}
-				/>
+				<Allocations 
+				updateAllocation={updateAllocation} 
+				createAllocation={createAllocation} 
+				resources={resources} 
+				allocations={allocations} 
+				editMode={state.editMode} 
+				onResourceAddStart={onResourceAddStart} />
 			)}
 			{(state.editMode || (isNewProject && state.addAllocationMode)) &&
 			state.newAllocations.length > 0 && (
@@ -415,9 +411,28 @@ export default withApollo(
 				resources: queryItemsLatestVersionByType.items
 			})
 		}),
+		graphql(gql(queryTypeIdsByType), {
+			options: () => ({
+				variables: { type: 'project' },
+				fetchPolicy: 'network-only'
+			}),
+			props: ({ data: { queryTypeIdsByType }}) => ({
+				typeIdsForProjects: queryTypeIdsByType
+			})
+		}),
+		graphql(gql(queryTypeIdsByType), {
+			options: () => ({
+				variables: { type: 'allocation' },
+				fetchPolicy: 'network-only'
+			}),
+			props: ({ data: { queryTypeIdsByType }}) => ({
+				typeIdsForAllocations: queryTypeIdsByType
+			})
+		}),
 		graphql(gql(updateItem), {
 			props: (props) => ({
 				updateProject: (project) => {
+					delete project['__typename'];
 					return props.mutate({
 						update: (proxy, { data: { updateItem: proj } }) => {
 							// Update query for current project
@@ -448,26 +463,70 @@ export default withApollo(
 		}),
 		graphql(gql(updateItem), {
 			props: (props) => ({
-				updateAllocation: (allocation, project) => {
+				updateAllocation: (allocation) => {
+					if(allocation.hasOwnProperty("tableData")){
+						delete allocation["tableData"];
+					}
+					if(allocation.hasOwnProperty("__typename")){
+						delete allocation["__typename"];
+					}
 					return props.mutate({
-						update: (proxy, { data: { updateItem: alloc } }) => {
+						update: (proxy, { data: { updateItem: updatedAllocation } }) => {
 							// Update query for all allocations
-							const v2 = { type: 'allocation', project_id: project.type_id };
-							const d2 = proxy.readQuery({
-								query: gql(queryItemsLatestVersionByProjectId),
-								variables: v2
-							});
-
-							d2.queryItemsLatestVersionByProjectId.items = [
-								...d2.queryItemsLatestVersionByProjectId.items.filter(
-									(p) => p.type_id !== alloc.type_id || p.version !== alloc.version
-								),
-								alloc
-							];
-
-							proxy.writeQuery({ query: gql(queryItemsLatestVersionByProjectId), data: d2 });
+							const v1 = { project_id: updatedAllocation.project_id, type: "allocation" };
+							const d1 = proxy.readQuery({ query : gql(queryItemsLatestVersionByProjectId), variables: v1 });
+	
+							d1.queryItemsLatestVersionByProjectId.items =  [ ...d1.queryItemsLatestVersionByProjectId.items.filter(p => p.type_id !== updatedAllocation.type_id || p.version !== updatedAllocation.version)  , updatedAllocation];
+	
+							proxy.writeQuery({ query : gql(queryItemsLatestVersionByProjectId), variables: v1, data: d1 });
 						},
 						variables: { input: allocation }
+					});
+				}
+			})
+		}),
+		graphql(gql(createItem), {
+			props: (props) => ({
+				createAllocation: (allocation) => {
+					if(allocation.hasOwnProperty("tableData")){
+						delete allocation["tableData"];
+					}
+					allocation.project_id = props.ownProps.project.type_id;
+					allocation.type_id = nextId("allocation", props.ownProps.typeIdsForAllocations);
+					allocation.version = 0;
+					allocation.status="active";
+					return props.mutate({
+						update: (proxy, { data: { createItem: newAllocation } }) => {
+							// Update query for all allocations
+							const v1 = {type:"allocation", project_id: newAllocation.project_id };
+							const d1 = proxy.readQuery({ query : gql(queryItemsLatestVersionByProjectId) , variables: v1 });
+	
+							d1.queryItemsLatestVersionByProjectId.items =  [ ...d1.queryItemsLatestVersionByProjectId.items.filter(p => p.type_id !== newAllocation.type_id || p.version !== newAllocation.version)  , newAllocation];
+	
+							proxy.writeQuery({ query : gql(queryItemsLatestVersionByProjectId) , data: d1});
+						},
+						variables: { input: allocation }
+					});
+				}
+			})
+		}),
+		graphql(gql(createItem), {
+			props: (props) => ({
+				createProject: (project) => {
+					project.type_id = nextId("project", props.ownProps.typeIdsForProjects);
+					project.version = 0;
+					project.status="active";
+					return props.mutate({
+						update: (proxy, { data: { createItem: newProject } }) => {
+							// Update query for all project
+							const v1 = { type: "project" };
+							const d1 = proxy.readQuery({ query : gql(queryItemsLatestVersionByType) , variables: v1 });
+	
+							d1.queryItemsLatestVersionByType.items =  [ ...d1.queryItemsLatestVersionByType.items.filter(p => p.type_id !== newProject.type_id || p.version !== newProject.version)  , newProject];
+	
+							proxy.writeQuery({ query : gql(queryItemsLatestVersionByType) , data: d1});
+						},
+						variables: { input: project }
 					});
 				}
 			})
