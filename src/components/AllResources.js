@@ -1,6 +1,5 @@
 import React from 'react';
 import MaterialTable from 'material-table';
-import SampleData from '../data/all-resources.json';
 import { graphql, compose, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { queryItemsLatestVersionByType } from '../graphql/queries';
@@ -8,10 +7,10 @@ import { queryItemsLatestVersionByType } from '../graphql/queries';
 function AllResources(props) {
 	const [ state, setState ] = React.useState({
 		columns: [
-			{ title: 'Id', field: 'id', hidden: true },
+			{ title: 'Id', field: 'type_id', hidden: true },
 			{ title: 'Name', field: 'name', defaultSort: 'asc' },
-			{ title: 'Reporting Manager', field: 'manager' },
-			{ title: 'Joined Date', field: 'start_date', type: 'date' }
+			{ title: 'Base Rate', field: 'rate' },
+			{ title: 'Domain', field: 'domain' }
 		],
 		data: props.resources
 	});
@@ -22,7 +21,7 @@ function AllResources(props) {
 			columns={state.columns}
 			data={state.data}
 			onRowClick={(event, rowData) => {
-				window.location = '/resources/' + rowData.resource_id;
+				window.location = '/resources/' + rowData.type_id;
 			}}
 			options={{
 				headerStyle: {

@@ -23,7 +23,11 @@ import NewAllocations from './NewAllocations';
 import Tooltip from '@material-ui/core/Tooltip';
 import { graphql, compose, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
-import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType, queryItemsLatestVersionByProjectId } from '../graphql/queries';
+import {
+	queryItemsLatestVersionByTypeId,
+	queryItemsLatestVersionByType,
+	queryItemsLatestVersionByProjectId
+} from '../graphql/queries';
 import { updateItem } from '../graphql/mutations';
 
 function Project(props) {
@@ -150,7 +154,7 @@ function Project(props) {
 								<Grid container spacing={2}>
 									<Grid item xs={1}>
 										<IconButton aria-label="business">
-											<BusinessIcon fontSize="large" />
+											<BusinessIcon fontSize="large" color="primary" />
 										</IconButton>
 									</Grid>
 									<Grid item xs={11}>
@@ -363,7 +367,12 @@ function Project(props) {
 					onResourceAddComplete={onResourceAddComplete}
 				/>
 			) : (
-				<Allocations resources={resources} allocations={allocations} editMode={state.editMode} onResourceAddStart={onResourceAddStart} />
+				<Allocations
+					resources={resources}
+					allocations={allocations}
+					editMode={state.editMode}
+					onResourceAddStart={onResourceAddStart}
+				/>
 			)}
 			{(state.editMode || (isNewProject && state.addAllocationMode)) &&
 			state.newAllocations.length > 0 && (
@@ -390,7 +399,7 @@ export default withApollo(
 		}),
 		graphql(gql(queryItemsLatestVersionByProjectId), {
 			options: ({ match: { params: { id } } }) => ({
-				variables: { project_id: id, type:"allocation" },
+				variables: { project_id: id, type: 'allocation' },
 				fetchPolicy: 'network-only'
 			}),
 			props: ({ data: { queryItemsLatestVersionByProjectId = { items: [] } } }) => ({
@@ -413,19 +422,24 @@ export default withApollo(
 						update: (proxy, { data: { updateItem: proj } }) => {
 							// Update query for current project
 							const v1 = { type_id: proj.type_id };
-							const d1 = proxy.readQuery({ query : gql(queryItemsLatestVersionByTypeId), variables: v1 });
-	
-							d1.queryItemsLatestVersionByTypeId.items =  [proj];
-	
-							proxy.writeQuery({ query : gql(queryItemsLatestVersionByTypeId), variables: v1, data: d1 });
+							const d1 = proxy.readQuery({ query: gql(queryItemsLatestVersionByTypeId), variables: v1 });
+
+							d1.queryItemsLatestVersionByTypeId.items = [ proj ];
+
+							proxy.writeQuery({ query: gql(queryItemsLatestVersionByTypeId), variables: v1, data: d1 });
 
 							// Update query for all projects
-							const v2 = { type: "project"};
-							const d2 = proxy.readQuery({ query : gql(queryItemsLatestVersionByType) , variables: v2 });
-	
-							d2.queryItemsLatestVersionByType.items =  [ ...d2.queryItemsLatestVersionByType.items.filter(p => p.type_id !== proj.type_id || p.version !== proj.version)  , proj];
-	
-							proxy.writeQuery({ query : gql(queryItemsLatestVersionByType) , data: d2});
+							const v2 = { type: 'project' };
+							const d2 = proxy.readQuery({ query: gql(queryItemsLatestVersionByType), variables: v2 });
+
+							d2.queryItemsLatestVersionByType.items = [
+								...d2.queryItemsLatestVersionByType.items.filter(
+									(p) => p.type_id !== proj.type_id || p.version !== proj.version
+								),
+								proj
+							];
+
+							proxy.writeQuery({ query: gql(queryItemsLatestVersionByType), data: d2 });
 						},
 						variables: { input: project }
 					});
@@ -438,12 +452,20 @@ export default withApollo(
 					return props.mutate({
 						update: (proxy, { data: { updateItem: alloc } }) => {
 							// Update query for all allocations
-							const v2 = { type: "allocation", project_id: project.type_id};
-							const d2 = proxy.readQuery({ query : gql(queryItemsLatestVersionByProjectId) , variables: v2 });
-	
-							d2.queryItemsLatestVersionByProjectId.items =  [ ...d2.queryItemsLatestVersionByProjectId.items.filter(p => p.type_id !== alloc.type_id || p.version !== alloc.version)  , alloc];
-	
-							proxy.writeQuery({ query : gql(queryItemsLatestVersionByProjectId) , data: d2});
+							const v2 = { type: 'allocation', project_id: project.type_id };
+							const d2 = proxy.readQuery({
+								query: gql(queryItemsLatestVersionByProjectId),
+								variables: v2
+							});
+
+							d2.queryItemsLatestVersionByProjectId.items = [
+								...d2.queryItemsLatestVersionByProjectId.items.filter(
+									(p) => p.type_id !== alloc.type_id || p.version !== alloc.version
+								),
+								alloc
+							];
+
+							proxy.writeQuery({ query: gql(queryItemsLatestVersionByProjectId), data: d2 });
 						},
 						variables: { input: allocation }
 					});
