@@ -6,7 +6,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 export default function MaterialTableDemo(props) {
 
-	const {allocations, resources, updateAllocation, createAllocation} = props;
+	const {allocations, resources, updateAllocation, createAllocation, removeAllocation} = props;
 
 	const resourceNames = {};
 
@@ -34,30 +34,35 @@ export default function MaterialTableDemo(props) {
 				onRowAdd: newData =>
 					new Promise(resolve => {
 						setTimeout(() => {
-							resolve();
-							const data = [...state.data];
-							data.push(newData);
-							setState({ ...state, data });
-							createAllocation(newData);
+							createAllocation(newData).then(() => {
+								const data = [...state.data];
+								data.push(newData);
+								setState({ ...state, data });
+								resolve();
+
+							});
 						}, 600);
 					}),
 				onRowUpdate: (newData, oldData) =>
 					new Promise(resolve => {
 						setTimeout(() => {
-							resolve();
-							const data = [...state.data];
-							data[data.indexOf(oldData)] = newData;
-							setState({ ...state, data });
-							updateAllocation(newData);
+							updateAllocation(newData).then(() => {
+								const data = [...state.data];
+								data[data.indexOf(oldData)] = newData;
+								setState({ ...state, data });
+								resolve();
+							});
 						}, 600);
 					}),
 				onRowDelete: oldData =>
 					new Promise(resolve => {
 						setTimeout(() => {
-							resolve();
-							const data = [...state.data];
-							data.splice(data.indexOf(oldData), 1);
-							setState({ ...state, data });
+							removeAllocation(oldData).then(() => {
+								const data = [...state.data];
+								data.splice(data.indexOf(oldData), 1);
+								setState({ ...state, data });
+								resolve();
+							});
 						}, 600);
 					}),
 			}}

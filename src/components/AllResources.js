@@ -40,7 +40,7 @@ export default withApollo(
 		graphql(gql(queryItemsLatestVersionByType), {
 			options: () => ({
 				variables: { type: 'resource' },
-				fetchPolicy: 'network-only'
+				fetchPolicy: 'cache-and-network'
 			}),
 			props: ({ data: { queryItemsLatestVersionByType = { items: [] } } }) => ({
 				resources: queryItemsLatestVersionByType.items

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Redirect } from 'react-router';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -49,19 +50,23 @@ function Project(props) {
 		}
 	}));
 
+
 	const classes = useStyles();
 	const isNewProject = props.match.params.id === '0';
-	const { project, allocations, resources, typeIdsForProjects, typeIdsForAllocations, updateProject, updateAllocation, createProject, createAllocation } = props;
+	const { project, allocations, resources, typeIdsForProjects, typeIdsForAllocations, updateProject,
+		 updateAllocation, createProject, createAllocation, archiveProjectGQL } = props;
 	const data = isNewProject ? {} : project;
 
 	const [ state, setState ] = React.useState({
 		projectData: data,
 		newAllocations: [],
-		editMode: isNewProject,
-		addAllocationMode: isNewProject,
+		editMode: isNewProject || props.location.state.editMode,
 		archivalConfirmationOpen: false,
-		allocations: allocations
+		allocations: allocations,
+		redirectProp : null
 	});
+
+	let oldState = Object.assign({}, state);
 
 	const onActionButtonOneClick = () => {
 		if (state.editMode) {
@@ -80,6 +85,7 @@ function Project(props) {
 	};
 
 	const editProject = () => {
+		oldState = Object.assign({}, state);
 		setState({ ...state, editMode: true, newAllocations: [] });
 	};
 
@@ -90,7 +96,7 @@ function Project(props) {
 	};
 
 	const cancelEditing = () => {
-		setState({ ...state, editMode: false, addAllocationMode: false });
+		setState({ ...oldState, redirectProp: isNewProject ? {} : null , editMode: false, addAllocationMode: false });
 	};
 
 	const archiveProject = () => {
@@ -103,7 +109,9 @@ function Project(props) {
 
 	const confirmArchival = () => {
 		toggleArchiveConfirmation();
-		window.location = '/';
+		archiveProjectGQL({...state.projectData}).then(() => {
+			state.redirectProp = {};
+		});
 	};
 
 	const toggleArchiveConfirmation = () => {
@@ -120,23 +128,6 @@ function Project(props) {
 
 	const handleChange = (name) => (event) => {
 		setState({ ...state, projectData: { ...state.projectData, [name]: event.target.value } });
-	};
-
-	const onResourceAddStart = () => {
-		setState({ ...state, addAllocationMode: true });
-	};
-
-	const onResourceAdd = (newAllocation) => {
-		setState({ ...state, newAllocations: [ ...state.newAllocations, newAllocation ] });
-	};
-
-	const onResourceAddComplete = () => {
-		setState({ ...state, addAllocationMode: false });
-	};
-
-	const onRemoveNewAllocation = (newAllocation) => {
-		let updatedAllocations = state.newAllocations.filter((a) => a.type_id !== newAllocation.type_id);
-		setState({ ...state, newAllocations: [ ...updatedAllocations ] });
 	};
 
 	const ProjectDetails = () => (
@@ -350,33 +341,15 @@ function Project(props) {
 		</Dialog>
 	);
 
+	if(state.redirectProp){
+		return (<Redirect to="/"/>);
+	}
+
 	return (
 		<div className={classes.root}>
 			<ProjectDetails />
 			<div className="View-space" />
-			{state.addAllocationMode || isNewProject ? (
-				<AvailableResources
-					isNewProject={isNewProject}
-					newAllocations={state.newAllocations}
-					onResourceAdd={onResourceAdd}
-					onResourceAddComplete={onResourceAddComplete}
-				/>
-			) : (
-				<Allocations 
-				updateAllocation={updateAllocation} 
-				createAllocation={createAllocation} 
-				resources={resources} 
-				allocations={allocations} 
-				editMode={state.editMode} 
-				onResourceAddStart={onResourceAddStart} />
-			)}
-			{(state.editMode || (isNewProject && state.addAllocationMode)) &&
-			state.newAllocations.length > 0 && (
-				<div>
-					<div className="View-space" />
-					<NewAllocations allocations={state.newAllocations} onRemoveNewAllocation={onRemoveNewAllocation} />
-				</div>
-			)}
+			<Allocations {...props} editMode={state.editMode}/>
 			<ArchivalConfirmation />
 		</div>
 	);
@@ -387,7 +360,7 @@ export default withApollo(
 		graphql(gql(queryItemsLatestVersionByTypeId), {
 			options: ({ match: { params: { id } } }) => ({
 				variables: { type_id: id },
-				fetchPolicy: 'network-only'
+				fetchPolicy: 'cache-and-network'
 			}),
 			props: ({ data: { queryItemsLatestVersionByTypeId = { items: [] } } }) => ({
 				project: queryItemsLatestVersionByTypeId.items[0]
@@ -396,7 +369,7 @@ export default withApollo(
 		graphql(gql(queryItemsLatestVersionByProjectId), {
 			options: ({ match: { params: { id } } }) => ({
 				variables: { project_id: id, type: 'allocation' },
-				fetchPolicy: 'network-only'
+				fetchPolicy: 'cache-and-network'
 			}),
 			props: ({ data: { queryItemsLatestVersionByProjectId = { items: [] } } }) => ({
 				allocations: queryItemsLatestVersionByProjectId.items
@@ -405,7 +378,7 @@ export default withApollo(
 		graphql(gql(queryItemsLatestVersionByType), {
 			options: () => ({
 				variables: { type: 'resource' },
-				fetchPolicy: 'network-only'
+				fetchPolicy: 'cache-and-network'
 			}),
 			props: ({ data: { queryItemsLatestVersionByType = { items: [] } } }) => ({
 				resources: queryItemsLatestVersionByType.items
@@ -414,7 +387,7 @@ export default withApollo(
 		graphql(gql(queryTypeIdsByType), {
 			options: () => ({
 				variables: { type: 'project' },
-				fetchPolicy: 'network-only'
+				fetchPolicy: 'cache-and-network'
 			}),
 			props: ({ data: { queryTypeIdsByType }}) => ({
 				typeIdsForProjects: queryTypeIdsByType
@@ -423,7 +396,7 @@ export default withApollo(
 		graphql(gql(queryTypeIdsByType), {
 			options: () => ({
 				variables: { type: 'allocation' },
-				fetchPolicy: 'network-only'
+				fetchPolicy: 'cache-and-network'
 			}),
 			props: ({ data: { queryTypeIdsByType }}) => ({
 				typeIdsForAllocations: queryTypeIdsByType
@@ -454,9 +427,9 @@ export default withApollo(
 								proj
 							];
 
-							proxy.writeQuery({ query: gql(queryItemsLatestVersionByType), data: d2 });
+							proxy.writeQuery({ query: gql(queryItemsLatestVersionByType),variables: v2, data: d2 });
 						},
-						variables: { input: project }
+						variables: { input: {...project} }
 					});
 				}
 			})
@@ -464,12 +437,8 @@ export default withApollo(
 		graphql(gql(updateItem), {
 			props: (props) => ({
 				updateAllocation: (allocation) => {
-					if(allocation.hasOwnProperty("tableData")){
 						delete allocation["tableData"];
-					}
-					if(allocation.hasOwnProperty("__typename")){
 						delete allocation["__typename"];
-					}
 					return props.mutate({
 						update: (proxy, { data: { updateItem: updatedAllocation } }) => {
 							// Update query for all allocations
@@ -480,7 +449,7 @@ export default withApollo(
 	
 							proxy.writeQuery({ query : gql(queryItemsLatestVersionByProjectId), variables: v1, data: d1 });
 						},
-						variables: { input: allocation }
+						variables: { input: {...allocation} }
 					});
 				}
 			})
@@ -503,9 +472,9 @@ export default withApollo(
 	
 							d1.queryItemsLatestVersionByProjectId.items =  [ ...d1.queryItemsLatestVersionByProjectId.items.filter(p => p.type_id !== newAllocation.type_id || p.version !== newAllocation.version)  , newAllocation];
 	
-							proxy.writeQuery({ query : gql(queryItemsLatestVersionByProjectId) , data: d1});
+							proxy.writeQuery({ query : gql(queryItemsLatestVersionByProjectId) ,variables: v1, data: d1});
 						},
-						variables: { input: allocation }
+						variables: { input: {...allocation} }
 					});
 				}
 			})
@@ -524,9 +493,64 @@ export default withApollo(
 	
 							d1.queryItemsLatestVersionByType.items =  [ ...d1.queryItemsLatestVersionByType.items.filter(p => p.type_id !== newProject.type_id || p.version !== newProject.version)  , newProject];
 	
-							proxy.writeQuery({ query : gql(queryItemsLatestVersionByType) , data: d1});
+							proxy.writeQuery({ query : gql(queryItemsLatestVersionByType) ,variables: v1, data: d1});
 						},
-						variables: { input: project }
+						variables: { input: {...project} }
+					});
+				}
+			})
+		}),
+		graphql(gql(updateItem), {
+			props: (props) => ({
+				removeAllocation: (allocation) => {
+						delete allocation["tableData"];
+						delete allocation["__typename"];
+					return props.mutate({
+						update: (proxy, { data: { updateItem: inactiveAllocation } }) => {
+							// Update query for all allocations
+							const v1 = { project_id: inactiveAllocation.project_id, type: "allocation" };
+							const d1 = proxy.readQuery({ query : gql(queryItemsLatestVersionByProjectId), variables: v1 });
+	
+							d1.queryItemsLatestVersionByProjectId.items =  [ ...d1.queryItemsLatestVersionByProjectId.items.filter(p => p.type_id !== inactiveAllocation.type_id || p.version !== inactiveAllocation.version)];
+	
+							proxy.writeQuery({ query : gql(queryItemsLatestVersionByProjectId), variables: v1, data: d1 });
+						},
+						variables: { input: {...allocation, status:"inactive"} }
+					});
+				}
+			})
+		}),
+		graphql(gql(updateItem), {
+			props: (props) => ({
+				archiveProjectGQL: (project) => {
+					delete project['__typename'];
+					return props.mutate({
+						update: (proxy, { data: { updateItem: archivedProject } }) => {
+							// Update query for current project
+							const v1 = { type_id: archivedProject.type_id };
+							const d1 = proxy.readQuery({ query: gql(queryItemsLatestVersionByTypeId), variables: v1 });
+
+							d1.queryItemsLatestVersionByTypeId.items = [];
+
+							proxy.writeQuery({ query: gql(queryItemsLatestVersionByTypeId), variables: v1, data: d1 });
+
+							// Update query for all projects
+							const v2 = { type: 'project' };
+							const d2 = proxy.readQuery({ query: gql(queryItemsLatestVersionByType), variables: v2 });
+
+							d2.queryItemsLatestVersionByType.items = [
+								...d2.queryItemsLatestVersionByType.items.filter(
+									(p) => p.type_id !== archivedProject.type_id || p.version !== archivedProject.version)
+							];
+
+							proxy.writeQuery({ query: gql(queryItemsLatestVersionByType), variables: v2, data: d2 });
+						},
+						variables: { input: {...project, status:"inactive"} },
+						optimisticResponse:{
+							data: {
+								updateItem: {...project, status:"inactive", __typename: "Item"}
+							}
+						}
 					});
 				}
 			})

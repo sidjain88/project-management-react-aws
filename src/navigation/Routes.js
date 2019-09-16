@@ -10,8 +10,8 @@ const Routes = () => (
 		<Redirect exact path="/" to="/home" />
 		<Route path="/home" component={HomeView} />
 		<Route path="/utilization" component={Utilization} />
-		<Route path="/projects/:id" component={Project} />}
-		<Route path="/resources/:id" component={Resource} />}/>
+		<Route path="/projects/:id" render={(props) => <Project {...props}  />} />
+		<Route path="/resources/:id" render={(props) => <Resource {...props}  />} />
 	</Switch>
 );
 

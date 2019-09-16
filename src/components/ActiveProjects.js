@@ -1,4 +1,5 @@
 import React from 'react';
+import { Redirect } from 'react-router';
 import MaterialTable from 'material-table';
 import Icon from '@material-ui/core/Icon';
 import { graphql, compose, withApollo } from 'react-apollo';
@@ -32,8 +33,15 @@ function ActiveProjects(props) {
 		],
 		data: projects.map((entry) =>
 			Object.assign(entry, { start_date: new Date(entry.start_date), end_date: new Date(entry.end_date) })
-		)
+		),
+		redirectProp : null
 	});
+
+	if(state.redirectProp) {
+		return (
+			<Redirect to={{pathname: "/projects/" + state.redirectProp.id , state: {editMode : state.redirectProp.editMode}}}></Redirect>
+		);
+	}
 
 	return (
 		<MaterialTable
@@ -41,7 +49,7 @@ function ActiveProjects(props) {
 			columns={state.columns}
 			data={state.data}
 			onRowClick={(event, rowData) => {
-				window.location = '/projects/' + rowData.type_id;
+				setState({...state, redirectProp : {id : rowData.type_id, editMode: false}});
 			}}
 			options={{
 				sorting: true,
@@ -60,20 +68,14 @@ function ActiveProjects(props) {
 					isFreeAction: true,
 					tooltip: 'Add project',
 					onClick: (event, rowData) => {
-						window.location = '/projects/0';
+						setState({...state, redirectProp : {id : "0"}});
 					}
 				},
 				{
 					icon: 'edit',
 					tooltip: 'Edit project',
 					onClick: (event, rowData) => {
-						//window.location = '/projects/' + rowData.type_id;
-						this.props.history.push({
-							pathname: '/projects/' + rowData.type_id,
-							data: {
-								editMode: true
-							}
-						});
+						setState({...state, redirectProp : {id : rowData.type_id, editMode: true}});
 					}
 				}
 			]}
@@ -111,7 +113,7 @@ const ActiveProjectsWithData = withApollo(
 		graphql(gql(queryItemsLatestVersionByType), {
 			options: () => ({
 				variables: { type: 'project' },
-				fetchPolicy: 'network-only'
+				fetchPolicy: 'cache-and-network'
 			}),
 			props: ({ data: { queryItemsLatestVersionByType = { items: [] } } }) => ({
 				projects: queryItemsLatestVersionByType.items
