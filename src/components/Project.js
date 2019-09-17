@@ -55,18 +55,18 @@ function Project(props) {
 	const isNewProject = props.match.params.id === '0';
 	const { project, allocations, resources, typeIdsForProjects, typeIdsForAllocations, updateProject,
 		 updateAllocation, createProject, createAllocation, archiveProjectGQL } = props;
-	const data = isNewProject ? {} : {...project};
+	const data = isNewProject ? {} : project;
 
 	const [ state, setState ] = React.useState({
 		projectData: data,
 		newAllocations: [],
-		editMode: isNewProject || props.location.state.editMode,
+		editMode: isNewProject || (props.location.state && props.location.state.editMode),
 		archivalConfirmationOpen: false,
-		allocations: allocations,
-		redirectProp : null
+		allocations: allocations
 	});
-
+	
 	let oldState = JSON.parse(JSON.stringify(state));
+	state.projectData = data;
 
 	const onActionButtonOneClick = () => {
 		if (state.editMode) {
@@ -85,18 +85,44 @@ function Project(props) {
 	};
 
 	const editProject = () => {
+		setState({ ...state, editMode: true });
 		oldState = JSON.parse(JSON.stringify(state));
-		setState({ ...state, editMode: true, newAllocations: [] });
 	};
 
 	const saveProject = async () => {
 		const project = { ...state.projectData }; 
-		isNewProject?  await createProject(project):await updateProject(project);
-		cancelEditing();
+		if(!project.start_date){
+			project.start_date = moment().format("YYYY-MM-DD");
+		}
+		if(!project.end_date){
+			project.end_date = moment().add(1,'M').format("YYYY-MM-DD");
+		}
+		if(isNewProject){
+			createProject(project).then(result => {
+				state.projectData = {...result.data.createItem};
+				project.type_id = state.projectData.type_id;
+				project.version = 0;
+				finishEditing();
+				});
+		}
+		else{
+			await updateProject(project).then(() => finishEditing());
+		}
+		
 	};
 
 	const cancelEditing = () => {
-		setState({ ...oldState, redirectProp: isNewProject ? {} : null , editMode: false, addAllocationMode: false });
+		setState({ ...oldState, editMode: false});
+		if(isNewProject){
+			props.history.push('/');
+		}
+	};
+
+	const finishEditing = () => {
+		setState({ ...state, editMode: false });
+		if(isNewProject) {
+			props.history.push('/projects/'+state.projectData.type_id);
+		}
 	};
 
 	const archiveProject = () => {
@@ -110,7 +136,7 @@ function Project(props) {
 	const confirmArchival = () => {
 		toggleArchiveConfirmation();
 		archiveProjectGQL({...state.projectData}).then(() => {
-			state.redirectProp = {};
+			props.history.push('/');
 		});
 	};
 
@@ -123,12 +149,11 @@ function Project(props) {
 	};
 
 	const handleDateChange = (type) => (newDate) => {
-		setState({ ...state, projectData: { ...state.projectData, [type]: newDate } });
+		state.projectData[type] = newDate;
 	};
 
 	const handleChange = (field) => (event) => {
 		state.projectData[field] = event.target.value;
-		// setState({ ...state, projectData: { ...state.projectData, [field]: event.target.value } });
 	};
 
 	const ProjectDetails = () => (
@@ -200,7 +225,7 @@ function Project(props) {
 								id="project_manager"
 								fullWidth
 								label="Project Manager"
-								value={state.projectData.manager}
+								defaultValue={state.projectData.manager}
 								onChange={handleChange('manager')}
 								className={classes.textField}
 								margin="normal"
@@ -212,7 +237,7 @@ function Project(props) {
 								id="project_type"
 								fullWidth
 								label="Type"
-								value={state.projectData.project_type}
+								defaultValue={state.projectData.project_type}
 								onChange={handleChange('project_type')}
 								className={classes.textField}
 								margin="normal"
@@ -228,7 +253,7 @@ function Project(props) {
 								id="budget"
 								fullWidth
 								label="Budget"
-								value={state.projectData.budget}
+								defaultValue={state.projectData.budget}
 								onChange={handleChange('budget')}
 								className={classes.textField}
 								margin="normal"
@@ -242,7 +267,7 @@ function Project(props) {
 								id="consumed_budget"
 								fullWidth
 								label="Consumed Budget"
-								value={state.projectData.consumed_budget}
+								defaultValue={state.projectData.consumed_budget}
 								onChange={handleChange('consumed_budget')}
 								className={classes.textField}
 								margin="normal"
@@ -265,7 +290,7 @@ function Project(props) {
 											format="dd/MM/yyyy"
 											margin="normal"
 											label="Start Date"
-											value={state.projectData.start_date}
+											value={state.projectData.start_date || moment()}
 											onChange={handleDateChange('start_date')}
 											KeyboardButtonProps={{
 												'aria-label': 'change date'
@@ -277,7 +302,7 @@ function Project(props) {
 											format="dd/MM/yyyy"
 											margin="normal"
 											label="End Date"
-											value={state.projectData.end_date}
+											value={state.projectData.end_date || moment().add(1, 'M')}
 											onChange={handleDateChange('end_date')}
 											KeyboardButtonProps={{
 												'aria-label': 'change date'
@@ -291,7 +316,7 @@ function Project(props) {
 										id="start_date"
 										fullWidth
 										label="Start Date"
-										value={formatDate(state.projectData.start_date)}
+										defaultValue={formatDate(state.projectData.start_date || moment())}
 										className={classes.textField}
 										margin="normal"
 										InputProps={{
@@ -301,7 +326,7 @@ function Project(props) {
 									<TextField
 										id="end_date"
 										label="End Date"
-										value={formatDate(state.projectData.end_date)}
+										defaultValue={formatDate(state.projectData.end_date || moment().add(1, 'M'))}
 										className={classes.textField}
 										margin="normal"
 										fullWidth
@@ -342,15 +367,11 @@ function Project(props) {
 		</Dialog>
 	);
 
-	if(state.redirectProp){
-		return (<Redirect to="/"/>);
-	}
-
 	return (
 		<div className={classes.root}>
 			<ProjectDetails />
 			<div className="View-space" />
-			<Allocations {...props} editMode={state.editMode}/>
+			{!isNewProject && <Allocations {...props}/>}
 			<ArchivalConfirmation />
 		</div>
 	);
@@ -488,7 +509,7 @@ export default withApollo(
 					project.status="active";
 					return props.mutate({
 						update: (proxy, { data: { createItem: newProject } }) => {
-							// Update query for all project
+							// Update query for all projects
 							const v1 = { type: "project" };
 							const d1 = proxy.readQuery({ query : gql(queryItemsLatestVersionByType) , variables: v1 });
 	
@@ -546,12 +567,7 @@ export default withApollo(
 
 							proxy.writeQuery({ query: gql(queryItemsLatestVersionByType), variables: v2, data: d2 });
 						},
-						variables: { input: {...project, status:"inactive"} },
-						optimisticResponse:{
-							data: {
-								updateItem: {...project, status:"inactive", __typename: "Item"}
-							}
-						}
+						variables: { input: {...project, status:"inactive"} }
 					});
 				}
 			})
