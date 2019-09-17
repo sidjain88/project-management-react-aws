@@ -55,7 +55,7 @@ function Project(props) {
 	const isNewProject = props.match.params.id === '0';
 	const { project, allocations, resources, typeIdsForProjects, typeIdsForAllocations, updateProject,
 		 updateAllocation, createProject, createAllocation, archiveProjectGQL } = props;
-	const data = isNewProject ? {} : project;
+	const data = isNewProject ? {} : {...project};
 
 	const [ state, setState ] = React.useState({
 		projectData: data,
@@ -66,7 +66,7 @@ function Project(props) {
 		redirectProp : null
 	});
 
-	let oldState = Object.assign({}, state);
+	let oldState = JSON.parse(JSON.stringify(state));
 
 	const onActionButtonOneClick = () => {
 		if (state.editMode) {
@@ -85,7 +85,7 @@ function Project(props) {
 	};
 
 	const editProject = () => {
-		oldState = Object.assign({}, state);
+		oldState = JSON.parse(JSON.stringify(state));
 		setState({ ...state, editMode: true, newAllocations: [] });
 	};
 
@@ -126,8 +126,9 @@ function Project(props) {
 		setState({ ...state, projectData: { ...state.projectData, [type]: newDate } });
 	};
 
-	const handleChange = (name) => (event) => {
-		setState({ ...state, projectData: { ...state.projectData, [name]: event.target.value } });
+	const handleChange = (field) => (event) => {
+		state.projectData[field] = event.target.value;
+		// setState({ ...state, projectData: { ...state.projectData, [field]: event.target.value } });
 	};
 
 	const ProjectDetails = () => (
@@ -149,7 +150,7 @@ function Project(props) {
 											className={classes.textField}
 											placeholder="Project Name"
 											margin="normal"
-											value={state.projectData.name}
+											defaultValue={state.projectData.name}
 											onChange={handleChange('name')}
 											label={state.editMode ? 'Project Name' : null}
 											inputProps={{
