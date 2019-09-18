@@ -18,6 +18,8 @@ export const createItem = `mutation CreateItem($input: CreateItemInput!) {
     role
     start_date
     status
+    base_rate
+    domain
     type_id
     version
   }
@@ -40,6 +42,8 @@ export const updateItem = `mutation UpdateItem($input: UpdateItemInput!) {
     role
     start_date
     status
+    base_rate
+    domain
     type_id
     version
   }
@@ -62,6 +66,8 @@ export const deleteItem = `mutation DeleteItem($input: DeleteItemInput!) {
     role
     start_date
     status
+    base_rate
+    domain
     type_id
     version
   }

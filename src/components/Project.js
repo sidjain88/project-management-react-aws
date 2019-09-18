@@ -19,30 +19,10 @@ import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType, queryIt
 import { updateItem, createItem, deleteItem } from '../graphql/mutations';
 import {nextId} from '../util/IdGenerator';
 import {ArchivalConfirmation} from './ArchiveConfirmation'
+import {useStyles} from '../styles/Styles'
 
 function Project(props) {
-	const useStyles = makeStyles((theme) => ({
-		root: {
-			flexGrow: 1
-		},
-		fab: {
-			margin: theme.spacing(1)
-		},
-		button: {
-			margin: theme.spacing(1)
-		},
-		paper: {
-			padding: theme.spacing(2),
-			textAlign: 'center',
-			color: theme.palette.text.primary
-		},
-		textField: {
-			marginLeft: theme.spacing(1),
-			marginRight: theme.spacing(1)
-		}
-	}));
-
-
+	
 	const classes = useStyles();
 	const isNewProject = props.match.params.id === '0';
 	const { project, allocations, resources, typeIdsForProjects, typeIdsForAllocations, updateProject,

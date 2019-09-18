@@ -1,9 +1,9 @@
 import React from 'react';
-import { Redirect } from 'react-router';
 import MaterialTable from 'material-table';
 import Icon from '@material-ui/core/Icon';
 import { graphql, compose, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
+import { Redirect } from 'react-router';
 import ArchiveIcon from '@material-ui/icons/Archive';
 import Tooltip from '@material-ui/core/Tooltip';
 import {ArchivalConfirmation} from './ArchiveConfirmation';
@@ -48,7 +48,7 @@ function ActiveProjects(props) {
 
 	return (
 		<MaterialTable
-			title="Ongoing Projects"
+			title="Active Projects"
 			columns={state.columns}
 			data={state.data}
 			onRowClick={(event, rowData) => {

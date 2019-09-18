@@ -22,6 +22,8 @@ export const onCreateItem = `subscription OnCreateItem(
     role
     start_date
     status
+    base_rate
+    domain
     type_id
     version
   }
@@ -48,6 +50,8 @@ export const onUpdateItem = `subscription OnUpdateItem(
     role
     start_date
     status
+    base_rate
+    domain
     type_id
     version
   }
@@ -74,6 +78,8 @@ export const onDeleteItem = `subscription OnDeleteItem(
     role
     start_date
     status
+    base_rate
+    domain
     type_id
     version
   }

@@ -1,43 +1,28 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Paper, TextField } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { Chart, ArgumentAxis, ValueAxis, LineSeries, Legend, ZoomAndPan } from '@devexpress/dx-react-chart-material-ui';
 import moment from 'moment';
+import { graphql, compose, withApollo } from 'react-apollo';
+import gql from 'graphql-tag';
+import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType, queryItemsLatestVersionByProjectId, queryTypeIdsByType } from '../graphql/queries';
+import { updateItem, createItem, deleteItem } from '../graphql/mutations';
+import {nextId} from '../util/IdGenerator';
+import {useStyles} from '../styles/Styles'
 
-const useStyles = makeStyles((theme) => ({
-	root: {
-		flexGrow: 1
-	},
-	fab: {
-		margin: theme.spacing(1)
-	},
-	button: {
-		margin: theme.spacing(1)
-	},
-	paper: {
-		padding: theme.spacing(2),
-		textAlign: 'center',
-		color: theme.palette.text.primary
-	},
-	textField: {
-		marginLeft: theme.spacing(1),
-		marginRight: theme.spacing(1)
-	}
-}));
+function Resource(props) {
 
-export function Resource() {
-	const classes = useStyles()
+	const classes = useStyles();
 
 	const getRandomInt = (min, max) => {
 		min = Math.ceil(min);
 		max = Math.floor(max);
 		return Math.floor(Math.random() * (max - min)) + min;
-	}
+	};
 
 	const generateData = (startDate, endDate) => {
 		const points = [];
@@ -51,24 +36,28 @@ export function Resource() {
 			points.push({ x: nextFriday, y });
 		}
 		return points;
-	}
+	};
+
+	const {resource} = props;
 
 	const [ state, setState ] = React.useState({
+		resource: props.match.params.id === "0" ? {} : {...resource},
 		startDate: moment().subtract(3, 'months'),
 		endDate: moment(),
-		data: generateData(moment().subtract(3, 'months'), moment())
-	})
+		chartData: generateData(moment().subtract(3, 'months'), moment())
+	});
 
 	const handleStartDateChange = (newDate) => {
-		setState({ ...state, startDate: newDate, data: generateData(newDate, state.endDate) });
-	}
+		setState({ ...state, startDate: newDate, chartData: generateData(newDate, state.endDate) });
+	};
 
 	const handleEndDateChange = (newDate) => {
-		setState({ ...state, endDate: newDate, data: generateData(state.startDate, newDate) });
-	}
+		setState({ ...state, endDate: newDate, chartData: generateData(state.startDate, newDate) });
+	};
 
 	return (
-		<Grid container spacing={5}>
+		<div>
+			{state.resource && <Grid container spacing={5}>
 			<Grid item xs={12}>
 				<Paper className={classes.paper}>
 					<Grid container spacing={2}>
@@ -77,7 +66,17 @@ export function Resource() {
 								<IconButton>
 									<AccountCircleIcon fontSize="large" color="primary" />
 								</IconButton>
-								<h2>James Smith</h2>
+								<TextField
+									id="name"
+									fullWidth
+									label="Name"
+									defaultValue={state.resource.name}
+									className={classes.textField}
+									margin="normal"
+									inputProps={{
+										readOnly: !state.editMode
+									}}
+								/>
 							</Grid>
 						</Grid>
 						<Grid item xs={4}>
@@ -85,22 +84,22 @@ export function Resource() {
 								id="rate"
 								fullWidth
 								label="Base Rate"
-								value="50"
+								defaultValue={state.resource.base_rate}
 								className={classes.textField}
 								margin="normal"
 								inputProps={{
-									readOnly: true
+									readOnly: !state.editMode
 								}}
 							/>
 							<TextField
 								id="domain"
 								fullWidth
 								label="Domain"
-								value="Domain 2"
+								defaultValue={state.resource.domain}
 								className={classes.textField}
 								margin="normal"
 								inputProps={{
-									readOnly: true
+									readOnly: !state.editMode
 								}}
 							/>
 						</Grid>
@@ -139,11 +138,11 @@ export function Resource() {
 							</MuiPickersUtilsProvider>
 						</Grid>
 						<Grid item xs={9}>
-							<Chart data={state.data}>
+							<Chart data={state.chartData}>
 								<ArgumentAxis
 									showTicks={true}
 									showLabels={true}
-									tickFormat={() => (y) => moment(y).format('DD/MM/YY')}
+									tickFormat={() => (y) => moment(y).format('Do MMM YY')}
 								/>
 								<ValueAxis />
 								<LineSeries valueField="y" argumentField="x" />
@@ -153,8 +152,21 @@ export function Resource() {
 					</Grid>
 				</Paper>
 			</Grid>
-		</Grid>
+		</Grid>}
+		</div>
 	);
 }
 
-export default Resource;
+export default withApollo(
+	compose(
+		graphql(gql(queryItemsLatestVersionByTypeId), {
+			options: ({ match: { params: { id } } }) => ({
+				variables: { type_id: id },
+				fetchPolicy: 'cache-and-network'
+			}),
+			props: ({ data: { queryItemsLatestVersionByTypeId = { items: [] } } }) => ({
+				resource: queryItemsLatestVersionByTypeId.items[0]
+			})
+		})
+	)(Resource)
+);

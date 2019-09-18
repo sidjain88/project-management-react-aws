@@ -18,6 +18,8 @@ export const getItem = `query GetItem($type_id: String!, $version: Int!) {
     role
     start_date
     status
+    base_rate
+    domain
     type_id
     version
   }
@@ -45,6 +47,8 @@ export const listItems = `query ListItems(
       role
       start_date
       status
+      base_rate
+      domain
       type_id
       version
     }
@@ -80,6 +84,8 @@ export const queryItemsLatestVersionByProjectId = `query QueryItemsLatestVersion
       role
       start_date
       status
+      base_rate
+      domain
       type_id
       version
     }
@@ -109,6 +115,8 @@ export const queryItemsLatestVersionByType = `query QueryItemsLatestVersionByTyp
       role
       start_date
       status
+      base_rate
+      domain
       type_id
       version
     }
@@ -142,6 +150,8 @@ export const queryItemsLatestVersionByTypeId = `query QueryItemsLatestVersionByT
       role
       start_date
       status
+      base_rate
+      domain
       type_id
       version
     }
