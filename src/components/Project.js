@@ -1,5 +1,4 @@
 import React from 'react';
-import { Redirect } from 'react-router';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -9,24 +8,17 @@ import BusinessIcon from '@material-ui/icons/Business';
 import { makeStyles } from '@material-ui/core/styles';
 import { Paper, InputAdornment, TextField } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Button from '@material-ui/core/Button';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import Allocations from './Allocations';
-import AvailableResources from './AvailableResources';
-import NewAllocations from './NewAllocations';
 import Tooltip from '@material-ui/core/Tooltip';
 import { graphql, compose, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType, queryItemsLatestVersionByProjectId, queryTypeIdsByType } from '../graphql/queries';
 import { updateItem, createItem, deleteItem } from '../graphql/mutations';
 import {nextId} from '../util/IdGenerator';
+import {ArchivalConfirmation} from './ArchiveConfirmation'
 
 function Project(props) {
 	const useStyles = makeStyles((theme) => ({
@@ -55,18 +47,21 @@ function Project(props) {
 	const isNewProject = props.match.params.id === '0';
 	const { project, allocations, resources, typeIdsForProjects, typeIdsForAllocations, updateProject,
 		 updateAllocation, createProject, createAllocation, archiveProjectGQL } = props;
-	const data = isNewProject ? {} : project;
+	const data = isNewProject ? {} : {...project};
 
 	const [ state, setState ] = React.useState({
 		projectData: data,
 		newAllocations: [],
 		editMode: isNewProject || (props.location.state && props.location.state.editMode),
 		archivalConfirmationOpen: false,
-		allocations: allocations
+		allocations: allocations,
+		isFirstTimeLoading: true
 	});
-	
-	let oldState = JSON.parse(JSON.stringify(state));
-	state.projectData = data;
+
+	if(state.isFirstTimeLoading)
+	 {
+		 state.projectData = {...data};
+	 }
 
 	const onActionButtonOneClick = () => {
 		if (state.editMode) {
@@ -86,7 +81,6 @@ function Project(props) {
 
 	const editProject = () => {
 		setState({ ...state, editMode: true });
-		oldState = JSON.parse(JSON.stringify(state));
 	};
 
 	const saveProject = async () => {
@@ -103,23 +97,26 @@ function Project(props) {
 				project.type_id = state.projectData.type_id;
 				project.version = 0;
 				finishEditing();
-				});
+			});
 		}
 		else{
-			await updateProject(project).then(() => finishEditing());
+			await updateProject(project).then((result) => {
+				
+				finishEditing();
+			});
 		}
 		
 	};
 
 	const cancelEditing = () => {
-		setState({ ...oldState, editMode: false});
+		setState({ ...state, editMode: false, projectData: {...project}, isFirstTimeLoading: false});
 		if(isNewProject){
 			props.history.push('/');
 		}
 	};
 
 	const finishEditing = () => {
-		setState({ ...state, editMode: false });
+		setState({ ...state, editMode: false, isFirstTimeLoading: false });
 		if(isNewProject) {
 			props.history.push('/projects/'+state.projectData.type_id);
 		}
@@ -343,36 +340,12 @@ function Project(props) {
 		</div>
 	);
 
-	const ArchivalConfirmation = () => (
-		<Dialog
-			open={state.archivalConfirmationOpen}
-			onClose={cancelArchival}
-			aria-labelledby="alert-dialog-title"
-			aria-describedby="alert-dialog-description"
-		>
-			<DialogTitle id="alert-dialog-title">{'Project Archival'}</DialogTitle>
-			<DialogContent>
-				<DialogContentText id="alert-dialog-description">
-					Are you sure you want to archive this project?
-				</DialogContentText>
-			</DialogContent>
-			<DialogActions>
-				<Button onClick={cancelArchival} color="primary">
-					Cancel
-				</Button>
-				<Button onClick={confirmArchival} color="primary" autoFocus>
-					Archive
-				</Button>
-			</DialogActions>
-		</Dialog>
-	);
-
 	return (
 		<div className={classes.root}>
 			<ProjectDetails />
 			<div className="View-space" />
 			{!isNewProject && <Allocations {...props}/>}
-			<ArchivalConfirmation />
+			<ArchivalConfirmation archivalConfirmationOpen = {state.archivalConfirmationOpen} cancelArchival={cancelArchival} confirmArchival = {confirmArchival} />
 		</div>
 	);
 }

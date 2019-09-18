@@ -4,12 +4,14 @@ import MaterialTable from 'material-table';
 import Icon from '@material-ui/core/Icon';
 import { graphql, compose, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
-import { queryItemsLatestVersionByType } from '../graphql/queries';
 import ArchiveIcon from '@material-ui/icons/Archive';
 import Tooltip from '@material-ui/core/Tooltip';
+import {ArchivalConfirmation} from './ArchiveConfirmation';
+import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType, queryItemsLatestVersionByProjectId, queryTypeIdsByType } from '../graphql/queries';
+import { updateItem, createItem, deleteItem } from '../graphql/mutations';
 
 function ActiveProjects(props) {
-	const { projects } = props;
+	const { projects, archiveProjectGQL } = props;
 
 	const [ state, setState ] = React.useState({
 		columns: [
@@ -34,7 +36,8 @@ function ActiveProjects(props) {
 		data: projects.map((entry) =>
 			Object.assign(entry, { start_date: new Date(entry.start_date), end_date: new Date(entry.end_date) })
 		),
-		redirectProp : null
+		redirectProp : null,
+		archivalConfirmationOpen : false
 	});
 
 	if(state.redirectProp) {
@@ -83,10 +86,12 @@ function ActiveProjects(props) {
 				onRowDelete: (oldData) =>
 					new Promise((resolve) => {
 						setTimeout(() => {
-							resolve();
-							const data = [ ...state.data ];
-							data.splice(data.indexOf(oldData), 1);
-							setState({ ...state, data });
+							archiveProjectGQL({...oldData}).then(() => {
+								const data = [ ...state.data ];
+								data.splice(data.indexOf(oldData), 1);
+								setState({ ...state, data });
+								resolve();
+							});
 						}, 600);
 					})
 			}}
@@ -117,6 +122,29 @@ const ActiveProjectsWithData = withApollo(
 			}),
 			props: ({ data: { queryItemsLatestVersionByType = { items: [] } } }) => ({
 				projects: queryItemsLatestVersionByType.items
+			})
+		}),
+		graphql(gql(updateItem), {
+			props: (props) => ({
+				archiveProjectGQL: (project) => {
+					delete project['__typename'];
+					delete project['tableData'];
+					return props.mutate({
+						update: (proxy, { data: { updateItem: archivedProject } }) => {
+							// Update query for all projects
+							const v2 = { type: 'project' };
+							const d2 = proxy.readQuery({ query: gql(queryItemsLatestVersionByType), variables: v2 });
+
+							d2.queryItemsLatestVersionByType.items = [
+								...d2.queryItemsLatestVersionByType.items.filter(
+									(p) => p.type_id !== archivedProject.type_id || p.version !== archivedProject.version)
+							];
+
+							proxy.writeQuery({ query: gql(queryItemsLatestVersionByType), variables: v2, data: d2 });
+						},
+						variables: { input: {...project, status:"inactive"} }
+					});
+				}
 			})
 		})
 	)(ActiveProjects)
