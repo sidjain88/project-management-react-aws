@@ -18,8 +18,8 @@ import gql from 'graphql-tag';
 import { queryItemsLatestVersionByTypeId, queryItemsLatestVersionByType, queryItemsLatestVersionByProjectId, queryTypeIdsByType } from '../graphql/queries';
 import { updateItem, createItem, deleteItem } from '../graphql/mutations';
 import {nextId} from '../util/IdGenerator';
-import {ArchivalConfirmation} from './ArchiveConfirmation'
-import {useStyles} from '../styles/Styles'
+import {ArchivalConfirmation} from './ArchiveConfirmation';
+import {useStyles} from '../styles/Styles';
 
 function Project(props) {
 	
