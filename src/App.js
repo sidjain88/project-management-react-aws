@@ -7,6 +7,8 @@ import awsmobile from './aws-exports';
 import { ApolloProvider } from "react-apollo";
 import AWSAppSyncClient, { defaultDataIdFromObject } from "aws-appsync";
 import { Rehydrated } from "aws-appsync-react";
+import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 const client = new AWSAppSyncClient({

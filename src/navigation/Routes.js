@@ -2,8 +2,8 @@ import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import HomeView from '../components/HomeView';
 import Project from '../components/Project';
-import Utilization from '../components/Utilization';
 import Resource from '../components/Resource';
+import { Utilization } from '../components/Utilization';
 
 const Routes = () => (
 	<Switch>
