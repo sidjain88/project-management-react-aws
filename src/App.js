@@ -9,7 +9,10 @@ import AWSAppSyncClient, { defaultDataIdFromObject } from "aws-appsync";
 import { Rehydrated } from "aws-appsync-react";
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { withAuthenticator} from 'aws-amplify-react'; 
+import Amplify, { Auth } from 'aws-amplify';
 
+Amplify.configure(awsmobile);
 
 const client = new AWSAppSyncClient({
 	url: awsmobile.aws_appsync_graphqlEndpoint,
@@ -17,6 +20,8 @@ const client = new AWSAppSyncClient({
 	auth: {
 	  type: awsmobile.aws_appsync_authenticationType,
 	  apiKey: awsmobile.aws_appsync_apiKey,
+	  ClientDatabasePrefix: "ProjectApi2_AMAZON_COGNITO_USER_POOLS",
+	  jwtToken: async () => (await Auth.currentSession()).getAccessToken().getJwtToken()
 	},
 	cacheOptions: {
 	  dataIdFromObject: (obj) => 
@@ -42,4 +47,4 @@ const WithProvider = () => (
 	</ApolloProvider>
   );
   
-  export default WithProvider;
+export default withAuthenticator(WithProvider, { includeGreetings: true });;

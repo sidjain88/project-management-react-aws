@@ -21,6 +21,11 @@
             "UnauthRoleName": "projects-devb-20190909155007-unauthRole",
             "StackName": "projects-devb-20190909155007",
             "StackId": "arn:aws:cloudformation:us-east-1:666349142035:stack/projects-devb-20190909155007/ae3f8720-d2c5-11e9-881c-123cb1b397a4"
+        },
+        "categories": {
+            "auth": {
+                "projectsce97d112": {}
+            }
         }
     }
 }
