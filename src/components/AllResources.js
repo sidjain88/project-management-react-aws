@@ -36,7 +36,7 @@ function AllResources(props) {
 			columns={state.columns}
 			data={state.data}
 			onRowClick={(event, rowData) => {
-				window.location = '/resources/' + rowData.type_id;
+				setState({...state, redirectProp : {id : rowData.type_id, editMode: false}});
 			}}
 			options={{
 				sorting: true,
